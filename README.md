@@ -35,8 +35,8 @@ Frequency=2338346 Hz, Resolution=427.6527 ns, Timer=TSC
 ### Speed
 | Method |       x86 |       x64 |
 |-------:|----------:|----------:|
-| Hash32 | 2.73 GB/s | 720  MB/s |
-| Hash64 | 5.05 GB/s | 8.92 GB/s |
+| Hash32 | 2.73 GB/s | 5.05 GB/s |
+| Hash64 | 720 MB/s  | 8.92 GB/s |
 
 ### How to use
 ``` cs
