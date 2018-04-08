@@ -13,7 +13,7 @@ Frequency=2338346 Hz, Resolution=427.6527 ns, Timer=TSC
 
 ```
 ### Platform (x64)
-| Method |          N |             Mean |              Min |              Max | Allocated |
+| Method |      Bytes |             Mean |              Min |              Max | Allocated |
 |------- |----------- |-----------------:|-----------------:|-----------------:|----------:|
 | **Hash32** |       **1024** |         **179.1 ns** |         **176.9 ns** |         **181.5 ns** |       **0 B** |
 | Hash64 |       1024 |         112.8 ns |         112.5 ns |         113.1 ns |       0 B |
@@ -23,7 +23,7 @@ Frequency=2338346 Hz, Resolution=427.6527 ns, Timer=TSC
 | Hash64 | 1073741824 | 112,638,993.1 ns | 111,995,167.3 ns | 113,573,740.3 ns |       0 B |
 
 ### Platform (x86)
-| Method |          N |               Mean |                Min |                Max | Allocated |
+| Method |      Bytes |               Mean |                Min |                Max | Allocated |
 |------- |----------- |-------------------:|-------------------:|-------------------:|----------:|
 | **Hash32** |       **1024** |           **354.9 ns** |           **354.5 ns** |           **355.5 ns** |       **0 B** |
 | Hash64 |       1024 |         1,380.3 ns |         1,361.0 ns |         1,398.3 ns |       0 B |
