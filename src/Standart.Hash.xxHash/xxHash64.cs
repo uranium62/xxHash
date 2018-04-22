@@ -1,4 +1,4 @@
-﻿namespace xxHash.Lib
+﻿namespace Standart.Hash.xxHash
 {
     public static class xxHash64
     {
@@ -8,11 +8,18 @@
         private const ulong p4 =  9650029242287828579UL;
         private const ulong p5 =  2870177450012600261UL;
 
+        /// <summary>
+        /// Compute xxHash for the data byte array
+        /// </summary>
+        /// <param name="data">The source of data</param>
+        /// <param name="len">The length of the data for hashing</param>
+        /// <param name="seed">The seed number</param>
+        /// <returns>hash</returns>
         public static unsafe ulong ComputeHash(byte[] data, int len, ulong seed = 0)
         {
             fixed (byte* pData = &data[0])
             {
-                ulong* ptr = (ulong*) pData;
+                byte* ptr = pData;
                 byte* end = pData + len;
                 ulong h64;
 
@@ -27,23 +34,25 @@
 
                     do
                     {
-                        v1 += ptr[0] * p2;
+                        v1 += *((ulong*)ptr) * p2;
                         v1 = (v1 << 31) | (v1 >> (64 - 31)); // rotl 31
                         v1 *= p1;
+                        ptr += 8;
 
-                        v2 += ptr[1] * p2;
+                        v2 += *((ulong*)ptr) * p2;
                         v2 = (v2 << 31) | (v2 >> (64 - 31)); // rotl 31
                         v2 *= p1;
+                        ptr += 8;
 
-                        v3 += ptr[2] * p2;
+                        v3 += *((ulong*)ptr) * p2;
                         v3 = (v3 << 31) | (v3 >> (64 - 31)); // rotl 31
                         v3 *= p1;
+                        ptr += 8;
 
-                        v4 += ptr[3] * p2;
+                        v4 += *((ulong*)ptr) * p2;
                         v4 = (v4 << 31) | (v4 >> (64 - 31)); // rotl 31
                         v4 *= p1;
-
-                        ptr += 4;
+                        ptr += 8;
 
                     } while (ptr <= limit);
 
@@ -90,28 +99,26 @@
                 // finalize
                 while (ptr <= end - 8)
                 {
-                    ulong t1 = ptr[0] * p2;
+                    ulong t1 = *((ulong*)ptr) * p2;
                     t1 = (t1 << 31) | (t1 >> (64 - 31)); // rotl 31
                     t1 *= p1;
                     h64 ^= t1;
                     h64 = ((h64 << 27) | (h64 >> (64 - 27))) * p1 + p4; // (rotl 27) * p1 + p4
-                    ptr += 1;
+                    ptr += 8;
                 }
-
-                uint* l32 = (uint*) ptr;
-                if (l32 <= end - 4)
+                
+                if (ptr <= end - 4)
                 {
-                    h64 ^= l32[0] * p1;
+                    h64 ^= *((uint*)ptr) * p1;
                     h64 = ((h64 << 23) | (h64 >> (64 - 23))) * p2 + p3; // (rotl 27) * p2 + p3
-                    l32 += 1;
+                    ptr += 4;
                 }
 
-                byte* lst = (byte*)l32;
-                while (lst < end)
+                while (ptr < end)
                 {
-                    h64 ^= lst[0] * p5;
+                    h64 ^= *((byte*)ptr) * p5;
                     h64 = ((h64 << 11) | (h64 >> (64 - 11))) * p1; // (rotl 11) * p1
-                    lst += 1;
+                    ptr += 1;
                 }
 
                 // avalanche

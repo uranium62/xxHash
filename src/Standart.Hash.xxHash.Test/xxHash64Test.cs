@@ -1,15 +1,15 @@
-﻿namespace xxHash.Test
+﻿namespace Standart.Hash.xxHash.Test
 {
     using System.Text;
-    using Lib;
-    using NUnit.Framework;
+    using Hash;
+    using Xunit;
 
-    [TestFixture]
     public class xxHash64Test
     {
-        [Test]
+        [Fact]
         public void Compute_hash_for_the_byte_array()
         {
+            // Arrange
             byte[] data = new byte[]
             {
                 0x60, 0x82, 0x40, 0x77, 0x8a, 0x0e, 0xe4, 0xd5,
@@ -36,21 +36,25 @@
 
             for (int len = 1; len <= data.Length; len++)
             {         
-                // Assert
-                ulong hash = xxHash64.ComputeHash(data, len);
                 // Act
-                Assert.AreEqual(hash, actual[len-1]);
+                ulong hash = xxHash64.ComputeHash(data, len);
+                
+                // Assert
+                Assert.Equal(hash, actual[len-1]);
             }
         }
 
-        [Test]
+        [Fact]
         public void Compute_hash_for_the_string()
         {
-            var data = Encoding.UTF8.GetBytes("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod");
+            // Arrange
+            byte[] data = Encoding.UTF8.GetBytes("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod");
 
-            var hash = xxHash64.ComputeHash(data, data.Length);
+            // Act
+            ulong hash = xxHash64.ComputeHash(data, data.Length);
 
-            Assert.AreEqual(hash, 0x5dee64ff7c935d7f);
+            // Assert
+            Assert.Equal((ulong) 0x5dee64ff7c935d7f, hash);
         }
     }
 }

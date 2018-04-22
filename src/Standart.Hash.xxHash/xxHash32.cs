@@ -1,18 +1,25 @@
-﻿namespace xxHash.Lib
+﻿namespace Standart.Hash.xxHash
 {
     public static class xxHash32
     {
         private const uint p1 = 2654435761U;
         private const uint p2 = 2246822519U;
         private const uint p3 = 3266489917U;
-        private const uint p4 =  668265263U;
-        private const uint p5 =  374761393U;
+        private const uint p4 = 668265263U;
+        private const uint p5 = 374761393U;
 
+        /// <summary>d
+        /// Compute xxHash for the data byte array
+        /// </summary>
+        /// <param name="data">The source of data</param>
+        /// <param name="len">The length of the data for hashing</param>
+        /// <param name="seed">The seed number</param>
+        /// <returns>hash</returns>
         public static unsafe uint ComputeHash(byte[] data, int len, uint seed = 0)
         {
             fixed (byte* pData = &data[0])
             {
-                uint* ptr = (uint*) pData;
+                byte* ptr = pData;
                 byte* end = pData + len;
                 uint h32;
 
@@ -27,22 +34,24 @@
 
                     do
                     {
-                        v1 += ptr[0] * p2;
+                        v1 += *((uint*)ptr) * p2;
                         v1 = (v1 << 13) | (v1 >> (32 - 13)); // rotl 13
                         v1 *= p1;
+                        ptr += 4;
 
-                        v2 += ptr[1] * p2;
+                        v2 += *((uint*)ptr) * p2;
                         v2 = (v2 << 13) | (v2 >> (32 - 13)); // rotl 13
                         v2 *= p1;
+                        ptr += 4;
 
-                        v3 += ptr[2] * p2;
+                        v3 += *((uint*)ptr) * p2;
                         v3 = (v3 << 13) | (v3 >> (32 - 13)); // rotl 13
                         v3 *= p1;
+                        ptr += 4;
 
-                        v4 += ptr[3] * p2;
+                        v4 += *((uint*)ptr) * p2;
                         v4 = (v4 << 13) | (v4 >> (32 - 13)); // rotl 13
                         v4 *= p1;
-
                         ptr += 4;
 
                     } while (ptr <= limit);
@@ -56,22 +65,22 @@
                 {
                     h32 = seed + p5;
                 }
+
                 h32 += (uint) len;
 
                 // finalize
                 while (ptr <= end - 4)
                 {
-                    h32 += ptr[0] * p3;
+                    h32 += *((uint*)ptr) * p3;
                     h32 = ((h32 << 17) | (h32 >> (32 - 17))) * p4; // (rotl 17) * p4
-                    ptr += 1;
+                    ptr += 4;
                 }
 
-                byte* lst = (byte*) ptr;
-                while (lst < end)
+                while (ptr < end)
                 {
-                    h32 += (*lst) * p5;
+                    h32 += *((byte*)ptr) * p5;
                     h32 = ((h32 << 11) | (h32 >> (32 - 11))) * p1; // (rotl 11) * p1
-                    lst += 1;
+                    ptr += 1;
                 }
 
                 // avalanche

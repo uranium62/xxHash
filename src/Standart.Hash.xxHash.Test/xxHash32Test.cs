@@ -1,15 +1,14 @@
-﻿namespace xxHash.Test
+﻿namespace Standart.Hash.xxHash.Test
 {
     using System.Text;
-    using Lib;
-    using NUnit.Framework;
+    using Xunit;
 
-    [TestFixture]
     public class xxHash32Test
     {
-        [Test]
+        [Fact]
         public void Compute_hash_for_the_byte_array()
         {
+            // Arrange
             byte[] data = new byte[]
             {
                 0xde, 0x55, 0x47, 0x7f, 0x14, 0x8f, 0xf1, 0x48,
@@ -30,19 +29,23 @@
             {
                 // Act
                 uint hash = xxHash32.ComputeHash(data, len);
+                
                 // Assert
-                Assert.AreEqual(hash, actual[len - 1]);
+                Assert.Equal(hash, actual[len - 1]);
             }
         }
 
-        [Test]
+        [Fact]
         public void Compute_hash_for_the_string()
         {
-            var data = Encoding.UTF8.GetBytes("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod");
+            // Arrange
+            byte[] data = Encoding.UTF8.GetBytes("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod");
 
-            var hash = xxHash32.ComputeHash(data, data.Length);
+            // Act
+            uint hash = xxHash32.ComputeHash(data, data.Length);
 
-            Assert.AreEqual(hash, 0xe3cd4dee);
+            // Assert
+            Assert.Equal(0xe3cd4dee, hash);
         }
     }
 }

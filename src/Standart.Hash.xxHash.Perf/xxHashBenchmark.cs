@@ -1,16 +1,15 @@
-﻿namespace xxHash.Perf
+﻿namespace Standart.Hash.xxHash.Perf
 {
     using System;
     using BenchmarkDotNet.Attributes;
     using BenchmarkDotNet.Attributes.Columns;
     using BenchmarkDotNet.Attributes.Exporters;
-    using Lib;
 
     [RPlotExporter, RankColumn]
     [MinColumn, MaxColumn]
     [MemoryDiagnoser]
-    [DisassemblyDiagnoser(printAsm: true, printSource: true)]
-    public class xxHashTest
+    //[DisassemblyDiagnoser(printAsm: true, printSource: true)]
+    public class xxHashBenchmark
     {
         const int KB = 1024;
         const int MB = 1024 * KB;

@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Standart.Hash.xxHash", "Standart.Hash.xxHash\Standart.Hash.xxHash.csproj", "{E468CD00-D581-46DD-ADE6-71EFA74AD62E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Standart.Hash.xxHash.Perf", "Standart.Hash.xxHash.Perf\Standart.Hash.xxHash.Perf.csproj", "{7B80269B-1EC4-40B5-8E19-F0A68C4404E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Standart.Hash.xxHash.Test", "Standart.Hash.xxHash.Test\Standart.Hash.xxHash.Test.csproj", "{0D9506CC-A6A1-4C0C-8827-9AB958942895}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E468CD00-D581-46DD-ADE6-71EFA74AD62E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E468CD00-D581-46DD-ADE6-71EFA74AD62E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E468CD00-D581-46DD-ADE6-71EFA74AD62E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E468CD00-D581-46DD-ADE6-71EFA74AD62E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B80269B-1EC4-40B5-8E19-F0A68C4404E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B80269B-1EC4-40B5-8E19-F0A68C4404E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B80269B-1EC4-40B5-8E19-F0A68C4404E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B80269B-1EC4-40B5-8E19-F0A68C4404E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D9506CC-A6A1-4C0C-8827-9AB958942895}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D9506CC-A6A1-4C0C-8827-9AB958942895}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D9506CC-A6A1-4C0C-8827-9AB958942895}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D9506CC-A6A1-4C0C-8827-9AB958942895}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
