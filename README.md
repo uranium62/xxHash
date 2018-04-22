@@ -1,5 +1,7 @@
 ### xxHash
+[![Build status](https://ci.appveyor.com/api/projects/status/j5gkm2rvxwu4gu3q?svg=true)](https://ci.appveyor.com/project/uranium62/xxhash)
 Extremely fast non-cryptographic hash algorithm http://www.xxhash.com/
+
 
 ### Benchmark
 ``` ini
