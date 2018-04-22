@@ -1,0 +1,12 @@
+version: xxHash-{branch}-{build}
+
+test: off
+
+install:
+  - ps: $env:DOTNET_BUILD_VERSION = $env:APPVEYOR_BUILD_NUMBER
+  
+build_script:
+  - cmd: build.cmd
+  
+artifacts:
+  - path: artifacts\*.nupkg
