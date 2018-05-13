@@ -1,50 +1,54 @@
-### xxHash
-[![Build status](https://ci.appveyor.com/api/projects/status/j5gkm2rvxwu4gu3q?svg=true)](https://ci.appveyor.com/project/uranium62/xxhash)
-Extremely fast non-cryptographic hash algorithm http://www.xxhash.com/
+<p align="center">
+  <a href="#" target="_blank" rel="noopener noreferrer">
+    <img width="550" src="https://user-images.githubusercontent.com/1567570/39971158-5b213cca-56ff-11e8-9a1e-6c717e95d092.png" alt="xxHash.st">
+  </a>
+</p>
+<p align="center">
+  Extremely fast non-cryptographic hash algorithm <a href="http://www.xxhash.com/" target="_blank">xxhash</a>
+</p>
+<br>
+<p align="center">
+  <a href="https://ci.appveyor.com/project/uranium62/xxhash">
+    <img src="https://ci.appveyor.com/api/projects/status/j5gkm2rvxwu4gu3q?svg=true" alt="build" />
+  </a>
+  <a href="https://github.com/uranium62/xxHash/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license" />
+  </a>
+</p>
 
+xxHash is an Extremely fast Hash algorithm, running at RAM speed limits. It successfully completes the **SMHasher** test suite which evaluates collision, dispersion and randomness qualities of hash functions.
 
-### Benchmark
-``` ini
+## Benchmarks
+This benchmark was launched on a **Windows 10 (10.0.16299.309)**. The reference system uses a **Intel Core i7-4700MQ CPU 2.40GHz (Haswell)**
 
-BenchmarkDotNet=v0.10.13, OS=Windows 10 Redstone 3 [1709, Fall Creators Update] (10.0.16299.309)
-Intel Core i7-4700MQ CPU 2.40GHz (Haswell), 1 CPU, 8 logical cores and 4 physical cores
-Frequency=2338346 Hz, Resolution=427.6527 ns, Timer=TSC
-  [Host]     : .NET Framework 4.7.1 (CLR 4.0.30319.42000), 64bit RyuJIT-v4.7.2633.0
-  DefaultJob : .NET Framework 4.7.1 (CLR 4.0.30319.42000), 64bit RyuJIT-v4.7.2633.0
+| Method        |       x64 |
+|---------------|----------:|
+| Hash32 Array  | 5.05 GB/s |
+| Hash64 Array  | 8.92 GB/s |
+| Hash32 Stream | 3.22 GB/s |
+| Hash64 Stream | 4.81 GB/s |
 
+## Api
+```cs
+public static uint ComputeHash(byte[] data, int length, uint seed = 0) { throw null; }
+public static uint ComputeHash(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
+public static async Task<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
 
+public static ulong ComputeHash(byte[] data, int length, ulong seed = 0) { throw null; }
+public static ulong ComputeHash(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
+public static async Task<ulong> ComputeHashAsync(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
 ```
-### Platform (x64)
-| Method |      Bytes |             Mean |              Min |              Max | Allocated |
-|------- |----------- |-----------------:|-----------------:|-----------------:|----------:|
-| **Hash32** |       **1024** |         **179.1 ns** |         **176.9 ns** |         **181.5 ns** |       **0 B** |
-| Hash64 |       1024 |         112.8 ns |         112.5 ns |         113.1 ns |       0 B |
-| **Hash32** |    **1048576** |     **167,038.5 ns** |     **164,833.0 ns** |     **168,950.2 ns** |       **0 B** |
-| Hash64 |    1048576 |      83,941.7 ns |      82,805.5 ns |      86,072.0 ns |       0 B |
-| **Hash32** | **1073741824** | **198,183,743.4 ns** | **197,721,867.3 ns** | **198,782,071.8 ns** |       **0 B** |
-| Hash64 | 1073741824 | 112,638,993.1 ns | 111,995,167.3 ns | 113,573,740.3 ns |       0 B |
 
-### Platform (x86)
-| Method |      Bytes |               Mean |                Min |                Max | Allocated |
-|------- |----------- |-------------------:|-------------------:|-------------------:|----------:|
-| **Hash32** |       **1024** |           **354.9 ns** |           **354.5 ns** |           **355.5 ns** |       **0 B** |
-| Hash64 |       1024 |         1,380.3 ns |         1,361.0 ns |         1,398.3 ns |       0 B |
-| **Hash32** |    **1048576** |       **357,399.4 ns** |       **356,245.1 ns** |       **358,044.0 ns** |       **0 B** |
-| Hash64 |    1048576 |     1,343,269.5 ns |     1,340,923.2 ns |     1,345,356.7 ns |       0 B |
-| **Hash32** | **1073741824** |   **365,925,742.3 ns** |   **360,332,613.3 ns** |   **369,159,819.6 ns** |       **0 B** |
-| Hash64 | 1073741824 | 1,388,585,469.4 ns | 1,368,307,867.2 ns | 1,428,744,362.7 ns |       0 B |
+## Examples
+A few examples of how to use api
+```cs
+byte[] data = Encoding.UTF8.GetBytes("veni vidi vici");
 
-### Speed
-| Method |       x86 |       x64 |
-|-------:|----------:|----------:|
-| Hash32 | 2.73 GB/s | 5.05 GB/s |
-| Hash64 | 720 MB/s  | 8.92 GB/s |
+ulong h64_1 = xxHash64.ComputeHash(data, data.Length);
+ulong h64_2 = xxHash64.ComputeHash(new MemoryStream(data));
+ulong h64_3 = await xxHash64.ComputeHashAsync(new MemoryStream(data));
 
-### How to use
-``` cs
-	byte[] data = Encoding.UTF8.GetBytes("veni vidi vici");
-
-	uint hash64 = xxHash64.ComputeHash(data, data.Length);
-	ulong hash32 = xxHash32.ComputeHash(data, data.Length);
-
+uint h32_1 = xxHash32.ComputeHash(data, data.Length);
+uint h32_2 = xxHash32.ComputeHash(new MemoryStream(data));
+uint h32_3 = await xxHash32.ComputeHashAsync(new MemoryStream(data));
 ```
