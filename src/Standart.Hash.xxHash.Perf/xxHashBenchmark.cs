@@ -1,6 +1,8 @@
 ﻿namespace Standart.Hash.xxHash.Perf
 {
     using System;
+    using System.IO;
+    using System.Threading.Tasks;
     using BenchmarkDotNet.Attributes;
     using BenchmarkDotNet.Attributes.Columns;
     using BenchmarkDotNet.Attributes.Exporters;
@@ -16,6 +18,7 @@
         const int GB = 1024 * MB;
 
         private byte[] data;
+        private MemoryStream stream;
 
         [Params(KB, MB, GB)]
         public int N;
@@ -25,8 +28,9 @@
         {
             data = new byte[N];
             new Random(42).NextBytes(data);
+            stream = new MemoryStream(data);
         }
-
+        
         [Benchmark]
         public uint Hash32()
         {
@@ -34,9 +38,33 @@
         }
 
         [Benchmark]
+        public uint Hash32_Stream()
+        {
+            return xxHash32.ComputeHash(stream);
+        }
+        
+        [Benchmark]
+        public async Task<uint> Hash32_StreamAsync()
+        {
+            return await xxHash32.ComputeHashAsync(stream);
+        }
+        
+        [Benchmark]
         public ulong Hash64()
         {
             return xxHash64.ComputeHash(data, data.Length);
+        }
+        
+        [Benchmark]
+        public ulong Hash64_Stream()
+        {
+            return xxHash64.ComputeHash(stream);
+        }
+        
+        [Benchmark]
+        public async Task<ulong> Hash64_StreamAsync()
+        {
+            return await xxHash64.ComputeHashAsync(stream);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\deps.props" />
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -12,10 +13,10 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.0" />
-    <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdk)" />
+    <PackageReference Include="xunit" Version="$(xUnit)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitRunner)" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="$(xUnitTool)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Standart.Hash.xxHash\Standart.Hash.xxHash.csproj" />

@@ -1,6 +1,6 @@
 ﻿namespace Standart.Hash.xxHash
 {
-    public static class xxHash32
+    public static partial class xxHash32
     {
         private const uint p1 = 2654435761U;
         private const uint p2 = 2246822519U;
@@ -12,18 +12,18 @@
         /// Compute xxHash for the data byte array
         /// </summary>
         /// <param name="data">The source of data</param>
-        /// <param name="len">The length of the data for hashing</param>
+        /// <param name="length">The length of the data for hashing</param>
         /// <param name="seed">The seed number</param>
         /// <returns>hash</returns>
-        public static unsafe uint ComputeHash(byte[] data, int len, uint seed = 0)
+        public static unsafe uint ComputeHash(byte[] data, int length, uint seed = 0)
         {
             fixed (byte* pData = &data[0])
             {
                 byte* ptr = pData;
-                byte* end = pData + len;
+                byte* end = pData + length;
                 uint h32;
 
-                if (len >= 16)
+                if (length >= 16)
                 {
                     byte* limit = end - 16;
 
@@ -66,7 +66,7 @@
                     h32 = seed + p5;
                 }
 
-                h32 += (uint) len;
+                h32 += (uint) length;
 
                 // finalize
                 while (ptr <= end - 4)

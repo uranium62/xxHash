@@ -1,6 +1,6 @@
 ﻿namespace Standart.Hash.xxHash
 {
-    public static class xxHash64
+    public static partial class xxHash64
     {
         private const ulong p1 = 11400714785074694791UL;
         private const ulong p2 = 14029467366897019727UL;
@@ -12,18 +12,18 @@
         /// Compute xxHash for the data byte array
         /// </summary>
         /// <param name="data">The source of data</param>
-        /// <param name="len">The length of the data for hashing</param>
+        /// <param name="length">The length of the data for hashing</param>
         /// <param name="seed">The seed number</param>
         /// <returns>hash</returns>
-        public static unsafe ulong ComputeHash(byte[] data, int len, ulong seed = 0)
+        public static unsafe ulong ComputeHash(byte[] data, int length, ulong seed = 0)
         {
             fixed (byte* pData = &data[0])
             {
                 byte* ptr = pData;
-                byte* end = pData + len;
+                byte* end = pData + length;
                 ulong h64;
 
-                if (len >= 32)
+                if (length >= 32)
                 {
                     byte* limit = end - 32;
 
@@ -94,7 +94,7 @@
                     h64 = seed + p5;
                 }
 
-                h64 += (ulong) len;
+                h64 += (ulong) length;
 
                 // finalize
                 while (ptr <= end - 8)
