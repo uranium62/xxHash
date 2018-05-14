@@ -14,12 +14,20 @@
   <a href="https://codecov.io/gh/uranium62/xxHash">
     <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
   </a>
+  <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
+    <img src="https://img.shields.io/badge/nuget-1.0.1-green.svg?style=flat-square" alt="nuget"/>
+  </a>
   <a href="https://github.com/uranium62/xxHash/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license" />
   </a>
 </p>
 
 xxHash is an Extremely fast Hash algorithm, running at RAM speed limits. It successfully completes the **SMHasher** test suite which evaluates collision, dispersion and randomness qualities of hash functions.
+
+## Instalation
+```
+PM> Install-Package Standart.Hash.xxHash
+```
 
 ## Benchmarks
 This benchmark was launched on a **Windows 10 (10.0.16299.309)**. The reference system uses a **Intel Core i7-4700MQ CPU 2.40GHz (Haswell)**
