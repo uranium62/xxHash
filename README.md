@@ -11,6 +11,9 @@
   <a href="https://ci.appveyor.com/project/uranium62/xxhash">
     <img src="https://ci.appveyor.com/api/projects/status/j5gkm2rvxwu4gu3q?svg=true" alt="build" />
   </a>
+  <a href="https://codecov.io/gh/uranium62/xxHash">
+    <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
+  </a>
   <a href="https://github.com/uranium62/xxHash/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license" />
   </a>

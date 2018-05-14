@@ -2,6 +2,10 @@ version: xxHash-{branch}-{build}
 
 test: off
 
+before_build:
+  - choco install opencover.portable
+  - choco install codecov
+
 install:
   - ps: $env:DOTNET_BUILD_VERSION = $env:APPVEYOR_BUILD_NUMBER
   
@@ -10,3 +14,7 @@ build_script:
   
 artifacts:
   - path: artifacts\*.nupkg
+  
+test_script:
+  - OpenCover.Console.exe -register:user -target:"dotnet.exe" -targetargs:"test src/Standart.Hash.xxHash.Test" -output:coverage.xml -oldstyle -filter:"+[Standart*]* -[*.Test]*"
+  - codecov -f "coverage.xml"
