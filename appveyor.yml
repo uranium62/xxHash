@@ -18,10 +18,3 @@ artifacts:
 test_script:
   - OpenCover.Console.exe -register:user -target:"dotnet.exe" -targetargs:"test src/Standart.Hash.xxHash.Test" -output:coverage.xml -oldstyle -filter:"+[Standart*]* -[*.Test]*"
   - codecov -f "coverage.xml"
-  
-deploy:
-  provider: NuGet
-  api_key:
-    secure: 8pM4+if5zngi9oyp1fWIdzdJBs0A2upEaLl+VL6L+rFEDSjEbUtit6k0OrPbDM/n
-  skip_symbols: true
-  artifact: /.*\.nupkg/
