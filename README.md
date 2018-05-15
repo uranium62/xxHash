@@ -15,7 +15,7 @@
     <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
-    <img src="https://img.shields.io/badge/nuget-1.0.1-green.svg?style=flat-square" alt="nuget"/>
+    <img src="https://img.shields.io/badge/nuget-1.0.2-green.svg?style=flat-square" alt="nuget"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
     <img src="https://img.shields.io/badge/platform-x64-blue.svg?longCache=true" alt="platform"/>
@@ -66,3 +66,7 @@ uint h32_1 = xxHash32.ComputeHash(data, data.Length);
 uint h32_2 = xxHash32.ComputeHash(new MemoryStream(data));
 uint h32_3 = await xxHash32.ComputeHashAsync(new MemoryStream(data));
 ```
+---
+<p align="center">
+Made in :beginner: Ukraine with :heart:
+</p>
