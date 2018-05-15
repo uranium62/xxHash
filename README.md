@@ -17,6 +17,9 @@
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
     <img src="https://img.shields.io/badge/nuget-1.0.1-green.svg?style=flat-square" alt="nuget"/>
   </a>
+  <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
+    <img src="https://img.shields.io/badge/platform-x64-blue.svg?longCache=true" alt="platform"/>
+  </a>
   <a href="https://github.com/uranium62/xxHash/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license" />
   </a>
