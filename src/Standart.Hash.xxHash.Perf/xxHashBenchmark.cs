@@ -40,12 +40,14 @@
         [Benchmark]
         public uint Hash32_Stream()
         {
+            stream.Seek(0, SeekOrigin.Begin);
             return xxHash32.ComputeHash(stream);
         }
         
         [Benchmark]
         public async Task<uint> Hash32_StreamAsync()
         {
+            stream.Seek(0, SeekOrigin.Begin);
             return await xxHash32.ComputeHashAsync(stream);
         }
         
@@ -58,12 +60,14 @@
         [Benchmark]
         public ulong Hash64_Stream()
         {
+            stream.Seek(0, SeekOrigin.Begin);
             return xxHash64.ComputeHash(stream);
         }
         
         [Benchmark]
         public async Task<ulong> Hash64_StreamAsync()
         {
+            stream.Seek(0, SeekOrigin.Begin);
             return await xxHash64.ComputeHashAsync(stream);
         }
     }
