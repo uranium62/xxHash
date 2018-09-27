@@ -3,10 +3,12 @@
     using System;
     using System.Buffers;
     using System.IO;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
 
     public static partial class xxHash32
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void Shift(byte[] data, int l, ref uint v1, ref uint v2, ref uint v3, ref uint v4)
         {
             fixed (byte* pData = &data[0])
@@ -40,6 +42,7 @@
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe uint Final(byte[] data, int l, ref uint v1, ref uint v2, ref uint v3, ref uint v4, long length, uint seed)
         {
             fixed (byte* pData = &data[0])
@@ -87,6 +90,7 @@
                 return h32;
             }
         }
+        
 
         /// <summary>
         /// Compute xxHash for the stream

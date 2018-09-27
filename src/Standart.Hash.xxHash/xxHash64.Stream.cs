@@ -3,11 +3,13 @@
     using System;
     using System.Buffers;
     using System.IO;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
 
 
     public static partial class xxHash64
     {      
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void Shift(byte[] data, int l, ref ulong v1, ref ulong v2, ref ulong v3, ref ulong v4)
         {
             fixed (byte* pData = &data[0])
@@ -41,6 +43,7 @@
             }
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe ulong Final(byte[] data, int l, ref ulong v1, ref ulong v2, ref ulong v3, ref ulong v4, long length, ulong seed)
         {
             fixed (byte* pData = &data[0])
