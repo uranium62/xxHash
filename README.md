@@ -15,7 +15,7 @@
     <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
-    <img src="https://img.shields.io/badge/nuget-1.0.2-green.svg?style=flat-square" alt="nuget"/>
+    <img src="https://img.shields.io/badge/nuget-1.0.4-green.svg?style=flat-square" alt="nuget"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
     <img src="https://img.shields.io/badge/platform-x64-blue.svg?longCache=true" alt="platform"/>

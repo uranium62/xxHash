@@ -170,7 +170,7 @@
                     Shift(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                     // Put remaining bytes to buffer
-                    Array.Copy(buffer, l, buffer, 0, r);
+                    xxBuffer.BlockCopy(buffer, l, buffer, 0, r);
                     offset = r;
                 }
 
@@ -225,7 +225,7 @@
                     Shift(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                     // Put remaining bytes to buffer
-                    Array.Copy(buffer, l, buffer, 0, r);
+                    xxBuffer.BlockCopy(buffer, l, buffer, 0, r);
                     offset = r;
                 }
 
