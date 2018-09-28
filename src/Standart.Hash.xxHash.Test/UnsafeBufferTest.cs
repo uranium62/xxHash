@@ -3,7 +3,7 @@
     using System;
     using Xunit;
 
-    public class xxBufferTest
+    public class UnsafeBufferTest
     {
         [Fact]
         public void Copy_different_blocks()
@@ -27,7 +27,7 @@
             // Act, Assert
             foreach (int count in counts)
             {
-                xxBuffer.BlockCopy(src, 0, dst, 0, count);
+                UnsafeBuffer.BlockCopy(src, 0, dst, 0, count);
 
                 for (int i = 0; i < count; i++)
                 {

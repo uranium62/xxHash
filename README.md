@@ -15,7 +15,7 @@
     <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
-    <img src="https://img.shields.io/badge/nuget-1.0.4-green.svg?style=flat-square" alt="nuget"/>
+    <img src="https://img.shields.io/badge/nuget-1.0.5-green.svg?style=flat-square" alt="nuget"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
     <img src="https://img.shields.io/badge/platform-x64-blue.svg?longCache=true" alt="platform"/>
@@ -39,16 +39,20 @@ This benchmark was launched on a **Windows 10 (10.0.16299.309)**. The reference 
 |---------------|----------:|
 | Hash32 Array  | 5.05 GB/s |
 | Hash64 Array  | 8.92 GB/s |
+| Hash32 Span   | 5.05 GB/s |
+| Hash64 Span   | 8.92 GB/s |
 | Hash32 Stream | 3.22 GB/s |
 | Hash64 Stream | 4.81 GB/s |
 
 ## Api
 ```cs
 public static uint ComputeHash(byte[] data, int length, uint seed = 0) { throw null; }
+public static uint ComputeHash(Span<byte> data, int length, uint seed = 0) { throw null; }
 public static uint ComputeHash(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
 public static async Task<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
 
 public static ulong ComputeHash(byte[] data, int length, ulong seed = 0) { throw null; }
+public static ulong ComputeHash(Span<byte> data, int length, ulong seed = 0) { throw null; }
 public static ulong ComputeHash(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
 public static async Task<ulong> ComputeHashAsync(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
 ```

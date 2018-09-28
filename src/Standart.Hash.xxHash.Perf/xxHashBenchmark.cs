@@ -4,8 +4,6 @@
     using System.IO;
     using System.Threading.Tasks;
     using BenchmarkDotNet.Attributes;
-    using BenchmarkDotNet.Attributes.Columns;
-    using BenchmarkDotNet.Attributes.Exporters;
 
     [RPlotExporter, RankColumn]
     [MinColumn, MaxColumn]
@@ -32,9 +30,16 @@
         }
         
         [Benchmark]
-        public uint Hash32()
+        public uint Hash32_Array()
         {
             return xxHash32.ComputeHash(data, data.Length);
+        }
+
+        [Benchmark]
+        public uint Hash32_Span()
+        {
+            Span<byte> span = new Span<byte>(data);
+            return xxHash32.ComputeHash(span, span.Length);
         }
 
         [Benchmark]
@@ -52,9 +57,16 @@
         }
         
         [Benchmark]
-        public ulong Hash64()
+        public ulong Hash64_Array()
         {
             return xxHash64.ComputeHash(data, data.Length);
+        }
+        
+        [Benchmark]
+        public ulong Hash64_Span()
+        {
+            Span<byte> span = new Span<byte>(data);
+            return xxHash64.ComputeHash(span, span.Length);
         }
         
         [Benchmark]

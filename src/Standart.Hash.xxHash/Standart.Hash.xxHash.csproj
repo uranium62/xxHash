@@ -13,6 +13,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Buffers" Version="$(SystemBuffers)" />
-    <PackageReference Include="System.IO" Version="$(SystemIO)" />
+	<PackageReference Include="System.IO" Version="$(SystemIO)" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemory)" />
+	<PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemTasks)" />
   </ItemGroup>
 </Project>

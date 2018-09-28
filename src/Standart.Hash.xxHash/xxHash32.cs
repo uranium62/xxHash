@@ -1,5 +1,9 @@
 ﻿namespace Standart.Hash.xxHash
 {
+    using System;
+    using System.Diagnostics;
+    using System.Runtime.CompilerServices;
+
     public static partial class xxHash32
     {
         private const uint p1 = 2654435761U;
@@ -8,7 +12,7 @@
         private const uint p4 = 668265263U;
         private const uint p5 = 374761393U;
 
-        /// <summary>d
+        /// <summary>
         /// Compute xxHash for the data byte array
         /// </summary>
         /// <param name="data">The source of data</param>
@@ -17,10 +21,39 @@
         /// <returns>hash</returns>
         public static unsafe uint ComputeHash(byte[] data, int length, uint seed = 0)
         {
+            Debug.Assert(data != null);
+            Debug.Assert(length >= 0);
+            Debug.Assert(length <= data.Length);
+            
             fixed (byte* pData = &data[0])
             {
-                byte* ptr = pData;
-                byte* end = pData + length;
+                return UnsafeComputeHash(pData, length, seed);
+            }
+        }
+
+        /// <summary>
+        /// Compute xxHash for the data byte span 
+        /// </summary>
+        /// <param name="data">The source of data</param>
+        /// <param name="length">The length of the data for hashing</param>
+        /// <param name="seed">The seed number</param>
+        /// <returns>hash</returns>
+        public static unsafe uint ComputeHash(Span<byte> data, int length, uint seed = 0)
+        {
+            Debug.Assert(data != null);
+            Debug.Assert(length >= 0);
+            Debug.Assert(length <= data.Length);
+            
+            fixed (byte* pData = &data[0])
+            {
+                return UnsafeComputeHash(pData, length, seed);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe uint UnsafeComputeHash(byte* ptr, int length, uint seed)
+        {           
+                byte* end = ptr + length;
                 uint h32;
 
                 if (length >= 16)
@@ -91,7 +124,6 @@
                 h32 ^= h32 >> 16;
 
                 return h32;
-            }
         }
     }
 }

@@ -2,13 +2,11 @@
 {
     using System;
     using BenchmarkDotNet.Attributes;
-    using BenchmarkDotNet.Attributes.Columns;
-    using BenchmarkDotNet.Attributes.Exporters;
     
     [RPlotExporter, RankColumn]
     [MinColumn, MaxColumn]
     [MemoryDiagnoser]
-    public class xxBufferBenchmark
+    public class UnsafeBufferBenchmark
     {
         private byte[] src;
         private byte[] des;
@@ -33,9 +31,9 @@
         }
         
         [Benchmark]
-        public void xxBufferCopy()
+        public void UnsafeBufferCopy()
         {
-            xxBuffer.BlockCopy(src, 0, des, 0, 32);
+            UnsafeBuffer.BlockCopy(src, 0, des, 0, 32);
         }
     }
 }

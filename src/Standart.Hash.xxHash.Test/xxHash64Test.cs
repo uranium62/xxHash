@@ -12,12 +12,15 @@
         {
             // Arrange
             byte[] data = {0x60};
+            Span<byte> span = new Span<byte>(data);
             
             // Act
-            ulong hash = xxHash64.ComputeHash(data, data.Length);
+            ulong hash1 = xxHash64.ComputeHash(data, data.Length);
+            ulong hash2 = xxHash64.ComputeHash(span, data.Length);
             
             // Assert
-            Assert.Equal(hash, (ulong) 0xb3e7ca6ca5ba3445);
+            Assert.Equal(hash1, (ulong) 0xb3e7ca6ca5ba3445);
+            Assert.Equal(hash2, (ulong) 0xb3e7ca6ca5ba3445);
         }
         
         [Fact]
@@ -25,12 +28,15 @@
         {
             // Arrange
             byte[] data = {0x60, 0x82, 0x40, 0x77, 0x8a};
+            Span<byte> span = new Span<byte>(data);
             
             // Act
-            ulong hash = xxHash64.ComputeHash(data, data.Length);
+            ulong hash1 = xxHash64.ComputeHash(data, data.Length);
+            ulong hash2 = xxHash64.ComputeHash(span, data.Length);
             
             // Assert
-            Assert.Equal(hash, (ulong) 0x917b11ed024938fc);
+            Assert.Equal(hash1, (ulong) 0x917b11ed024938fc);
+            Assert.Equal(hash2, (ulong) 0x917b11ed024938fc);
         }
         
         [Fact]
@@ -42,12 +48,15 @@
                 0x60, 0x82, 0x40, 0x77, 0x8a, 0x0e, 0xe4, 0xd5,
                 0x85, 0x1f, 0xa6, 0x86, 0x34,
             };
+            Span<byte> span = new Span<byte>(data);
             
             // Act
-            ulong hash = xxHash64.ComputeHash(data, data.Length);
+            ulong hash1 = xxHash64.ComputeHash(data, data.Length);
+            ulong hash2 = xxHash64.ComputeHash(span, data.Length);
             
             // Assert
-            Assert.Equal(hash, (ulong) 0x9d1cb0d181d58bee);
+            Assert.Equal(hash1, (ulong) 0x9d1cb0d181d58bee);
+            Assert.Equal(hash2, (ulong) 0x9d1cb0d181d58bee);
         }
         
         [Fact]
@@ -61,12 +70,15 @@
                 0x30, 0x5d, 0x84, 0x54, 0x15, 0xf9, 0xbd, 0x03,
                 0x4b, 0x0f, 0x90, 0x4e, 0xf5, 0x57, 0x21, 0x21,
             };
+            Span<byte> span = new Span<byte>(data);
             
             // Act
-            ulong hash = xxHash64.ComputeHash(data, data.Length);
+            ulong hash1 = xxHash64.ComputeHash(data, data.Length);
+            ulong hash2 = xxHash64.ComputeHash(span, data.Length);
             
             // Assert
-            Assert.Equal(hash, (ulong) 0x9233096b7804e12c);
+            Assert.Equal(hash1, (ulong) 0x9233096b7804e12c);
+            Assert.Equal(hash2, (ulong) 0x9233096b7804e12c);
         }
         
         [Fact]
@@ -84,12 +96,15 @@
                 0x27, 0x6d, 0xb3, 0x5c, 0xc7, 0xc0, 0xd0, 0xa0,
                 0x7e, 0x28, 0xce, 0x46, 0x85, 0xb7, 0x2b, 0x16,
             };
+            Span<byte> span = new Span<byte>(data);
             
             // Act
-            ulong hash = xxHash64.ComputeHash(data, data.Length);
+            ulong hash1 = xxHash64.ComputeHash(data, data.Length);
+            ulong hash2 = xxHash64.ComputeHash(span, data.Length);
             
             // Assert
-            Assert.Equal(hash, (ulong) 0x4c0a65b1ef9ea060);
+            Assert.Equal(hash1, (ulong) 0x4c0a65b1ef9ea060);
+            Assert.Equal(hash2, (ulong) 0x4c0a65b1ef9ea060);
         }
         
         [Fact]

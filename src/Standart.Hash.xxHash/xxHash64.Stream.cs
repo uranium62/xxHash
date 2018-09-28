@@ -1,7 +1,7 @@
 ﻿namespace Standart.Hash.xxHash
 {
-    using System;
     using System.Buffers;
+    using System.Diagnostics;
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
@@ -45,14 +45,14 @@
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe ulong Final(byte[] data, int l, ref ulong v1, ref ulong v2, ref ulong v3, ref ulong v4, long length, ulong seed)
-        {
+        {   
             fixed (byte* pData = &data[0])
             {
                 byte* ptr = pData;
                 byte* end = pData + l;
                 ulong h64;
 
-                if (length >= 16)
+                if (length >= 32)
                 {
                     h64 = ((v1 << 1) | (v1 >> (64 - 1))) +   // rotl 1
                           ((v2 << 7) | (v2 >> (64 - 7))) +   // rotl 7
@@ -140,6 +140,9 @@
         /// <returns>The hash</returns>
         public static ulong ComputeHash(Stream stream, int bufferSize = 8192, ulong seed = 0)
         {
+            Debug.Assert(stream != null);
+            Debug.Assert(bufferSize > 32);
+            
             // Optimizing memory allocation
             byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize + 32);
 
@@ -170,7 +173,7 @@
                     Shift(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                     // Put remaining bytes to buffer
-                    xxBuffer.BlockCopy(buffer, l, buffer, 0, r);
+                    UnsafeBuffer.BlockCopy(buffer, l, buffer, 0, r);
                     offset = r;
                 }
 
@@ -193,8 +196,11 @@
         /// <param name="bufferSize">The buffer size</param>
         /// <param name="seed">The seed number</param>
         /// <returns>The hash</returns>
-        public static async Task<ulong> ComputeHashAsync(Stream stream, int bufferSize = 8192, ulong seed = 0)
+        public static async ValueTask<ulong> ComputeHashAsync(Stream stream, int bufferSize = 8192, ulong seed = 0)
         {
+            Debug.Assert(stream != null);
+            Debug.Assert(bufferSize > 32);
+            
             // Optimizing memory allocation
             byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize + 32);
 
@@ -225,7 +231,7 @@
                     Shift(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                     // Put remaining bytes to buffer
-                    xxBuffer.BlockCopy(buffer, l, buffer, 0, r);
+                    UnsafeBuffer.BlockCopy(buffer, l, buffer, 0, r);
                     offset = r;
                 }
 

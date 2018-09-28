@@ -1,5 +1,9 @@
 ﻿namespace Standart.Hash.xxHash
 {
+    using System;
+    using System.Diagnostics;
+    using System.Runtime.CompilerServices;
+
     public static partial class xxHash64
     {
         private const ulong p1 = 11400714785074694791UL;
@@ -17,10 +21,39 @@
         /// <returns>hash</returns>
         public static unsafe ulong ComputeHash(byte[] data, int length, ulong seed = 0)
         {
+            Debug.Assert(data != null);
+            Debug.Assert(length >= 0);
+            Debug.Assert(length <= data.Length);
+            
             fixed (byte* pData = &data[0])
             {
-                byte* ptr = pData;
-                byte* end = pData + length;
+                return UnsafeComputeHash(pData, length, seed);
+            }
+        }
+        
+        /// <summary>
+        /// Compute xxHash for the data byte span
+        /// </summary>
+        /// <param name="data">The source of data</param>
+        /// <param name="length">The length of the data for hashing</param>
+        /// <param name="seed">The seed number</param>
+        /// <returns>hash</returns>
+        public static unsafe ulong ComputeHash(Span<byte> data, int length, ulong seed = 0)
+        {
+            Debug.Assert(data != null);
+            Debug.Assert(length >= 0);
+            Debug.Assert(length <= data.Length);
+            
+            fixed (byte* pData = &data[0])
+            {
+                return UnsafeComputeHash(pData, length, seed);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe ulong UnsafeComputeHash(byte* ptr, int length, ulong seed)
+        {
+                byte* end = ptr + length;
                 ulong h64;
 
                 if (length >= 32)
@@ -129,7 +162,6 @@
                 h64 ^= h64 >> 32;
 
                 return h64;
-            }
         }
     }
 }

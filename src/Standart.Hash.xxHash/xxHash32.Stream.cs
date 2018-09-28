@@ -1,7 +1,7 @@
 ﻿namespace Standart.Hash.xxHash
 {
-    using System;
     using System.Buffers;
+    using System.Diagnostics;
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
@@ -101,6 +101,9 @@
         /// <returns>The hash</returns>
         public static uint ComputeHash(Stream stream, int bufferSize = 4096, uint seed = 0)
         {
+            Debug.Assert(stream != null);
+            Debug.Assert(bufferSize > 16);
+            
             // Optimizing memory allocation
             byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize + 16);
 
@@ -131,7 +134,7 @@
                     Shift(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                     // Put remaining bytes to buffer
-                    xxBuffer.BlockCopy(buffer, l, buffer, 0, r);
+                    UnsafeBuffer.BlockCopy(buffer, l, buffer, 0, r);
                     offset = r;
                 }
 
@@ -154,8 +157,11 @@
         /// <param name="bufferSize">The buffer size</param>
         /// <param name="seed">The seed number</param>
         /// <returns>The hash</returns>
-        public static async Task<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0)
+        public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0)
         {
+            Debug.Assert(stream != null);
+            Debug.Assert(bufferSize > 16);
+            
             // Optimizing memory allocation
             byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize + 16);
 
@@ -186,7 +192,7 @@
                     Shift(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                     // Put remaining bytes to buffer
-                    xxBuffer.BlockCopy(buffer, l, buffer, 0, r);
+                    UnsafeBuffer.BlockCopy(buffer,l, buffer, 0, r);
                     offset = r;
                 }
 
