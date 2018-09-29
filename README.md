@@ -44,6 +44,32 @@ This benchmark was launched on a **Windows 10 (10.0.16299.309)**. The reference 
 | Hash32 Stream | 3.22 GB/s |
 | Hash64 Stream | 4.81 GB/s |
 
+## Comparison between С# and C implementation
+
+| Method        |      Time |
+|---------------|----------:|
+| Hash32 C# 1KB |  185.1 ns |
+| Hash32 C  1KB |  183.5 ns |
+| Hash64 C# 1KB |  117.3 ns |
+| Hash64 C  1KB |  104.8 ns |
+| Hash32 C# 1MB |  170.6 us |
+| Hash32 C  1MB |  170.1 us |
+| Hash64 C# 1MB |   87.1 us |
+| Hash64 C  1MB |   85.3 us |
+| Hash32 C# 1GB |  193.6 ms |
+| Hash32 C  1GB |  190.8 ms |
+| Hash64 C# 1GB |  116.9 ms |
+| Hash64 C  1GB |  114.1 ms |
+
+## Defference
+
+| Method | Platform | Language | Size |      Time |     Speed | Difference |
+|--------|---------:|---------:|-----:|----------:|----------:|-----------:|      
+| Hash32 |      x64 |       C# |  1GB |  193.6 ms | 5.16 GB/s |      1.4 % |
+| Hash32 |      x64 |       C  |  1GB |  190.8 ms | 5.24 GB/s |      1.4 % |
+| Hash64 |      x64 |       C# |  1GB |  116.9 ms | 8.55 GB/s |      2.4 % |
+| Hash64 |      x64 |       C  |  1GB |  114.1 ms | 8.76 GB/s |      2.4 % |
+
 ## Api
 ```cs
 public static uint ComputeHash(byte[] data, int length, uint seed = 0) { throw null; }
