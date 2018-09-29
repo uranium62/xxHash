@@ -49,9 +49,9 @@ This benchmark was launched on a **Windows 10 (10.0.16299.309)**. The reference 
 | Method | Platform | Language |  1KB Time |  1MB Time |  1GB Time |     Speed | Difference |
 |--------|---------:|---------:|----------:|----------:|----------:|----------:|-----------:| 
 | Hash32 |      x64 |       C# |  185.1 ns |  170.6 us |  193.6 ms | 5.16 GB/s |      1.4 % |
-| Hash32 |      x64 |       C  |  183.5 ns |  170.1 us |  190.8 ms | 5.16 GB/s |      1.4 % |
-| Hash64 |      x64 |       C# |  117.3 ns |   87.1 us |  116.9 ms | 5.16 GB/s |      2.4 % |
-| Hash64 |      x64 |       C  |  104.8 ns |   85.3 us |  114.1 ms | 5.16 GB/s |      2.4 % |
+| Hash32 |      x64 |       C  |  183.5 ns |  170.1 us |  190.8 ms | 5.24 GB/s |      1.4 % |
+| Hash64 |      x64 |       C# |  117.3 ns |   87.1 us |  116.9 ms | 8.55 GB/s |      2.4 % |
+| Hash64 |      x64 |       C  |  104.8 ns |   85.3 us |  114.1 ms | 8.76 GB/s |      2.4 % |
 
 
 ## Api
