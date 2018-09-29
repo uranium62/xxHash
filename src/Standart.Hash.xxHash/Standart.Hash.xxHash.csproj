@@ -17,4 +17,7 @@
     <PackageReference Include="System.Memory" Version="$(SystemMemory)" />
 	<PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemTasks)" />
   </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
 </Project>
