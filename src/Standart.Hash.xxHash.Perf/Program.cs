@@ -6,7 +6,8 @@
     {
         public static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<xxHashBenchmark>();
+            BenchmarkRunner.Run<xxHashBenchmark>();
+            BenchmarkRunner.Run<UnsafeBufferBenchmark>();
         }
     }
 }

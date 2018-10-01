@@ -24,8 +24,10 @@
         [GlobalSetup]
         public void Setup()
         {
+            Random rand = new Random(42);
+
             data = new byte[N];
-            new Random(42).NextBytes(data);
+            rand.NextBytes(data);
             stream = new MemoryStream(data);
         }
         
