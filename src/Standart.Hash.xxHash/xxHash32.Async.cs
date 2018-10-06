@@ -35,7 +35,7 @@
             try
             {
                 // Read flow of bytes
-                while ((readBytes = await stream.ReadAsync(buffer, offset, bufferSize)) > 0)
+                while ((readBytes = await stream.ReadAsync(buffer, offset, bufferSize).ConfigureAwait(false)) > 0)
                 {
                     length = length + readBytes;
                     offset = offset + readBytes;
