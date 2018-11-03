@@ -3,6 +3,7 @@
     using System.Buffers;
     using System.Diagnostics;
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
 
     public static partial class xxHash32
@@ -15,6 +16,20 @@
         /// <param name="seed">The seed number</param>
         /// <returns>The hash</returns>
         public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0)
+        {
+            return await ComputeHashAsync(stream, bufferSize, seed, CancellationToken.None);
+        }
+        
+        
+        /// <summary>
+        /// Compute xxHash for the async stream
+        /// </summary>
+        /// <param name="stream">The stream of data</param>
+        /// <param name="bufferSize">The buffer size</param>
+        /// <param name="seed">The seed number</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The hash</returns>
+        public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize, uint seed, CancellationToken cancellationToken)
         {
             Debug.Assert(stream != null);
             Debug.Assert(bufferSize > 16);
@@ -35,8 +50,14 @@
             try
             {
                 // Read flow of bytes
-                while ((readBytes = await stream.ReadAsync(buffer, offset, bufferSize).ConfigureAwait(false)) > 0)
+                while ((readBytes = await stream.ReadAsync(buffer, offset, bufferSize, cancellationToken).ConfigureAwait(false)) > 0)
                 {
+                    // Exit if the operation is canceled
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return await Task.FromCanceled<uint>(cancellationToken);
+                    }
+                    
                     length = length + readBytes;
                     offset = offset + readBytes;
 

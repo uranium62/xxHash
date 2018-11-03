@@ -15,7 +15,7 @@
     <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
-    <img src="https://img.shields.io/badge/nuget-1.0.5-green.svg?style=flat-square" alt="nuget"/>
+    <img src="https://img.shields.io/badge/nuget-1.0.6-green.svg?style=flat-square" alt="nuget"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
     <img src="https://img.shields.io/badge/platform-x64-blue.svg?longCache=true" alt="platform"/>
@@ -74,13 +74,15 @@ byte[] data = Encoding.UTF8.GetBytes("veni vidi vici");
 
 ulong h64_1 = xxHash64.ComputeHash(data, data.Length);
 ulong h64_2 = xxHash64.ComputeHash(new Span<byte>(data), data.Length);
-ulong h64_3 = xxHash64.ComputeHash(new MemoryStream(data));
-ulong h64_4 = await xxHash64.ComputeHashAsync(new MemoryStream(data));
+ulong h64_3 = xxHash64.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
+ulong h64_4 = xxHash64.ComputeHash(new MemoryStream(data));
+ulong h64_5 = await xxHash64.ComputeHashAsync(new MemoryStream(data));
 
 uint h32_1 = xxHash32.ComputeHash(data, data.Length);
 uint h32_2 = xxHash32.ComputeHash(new Span<byte>(data), data.Length);
-uint h32_3 = xxHash32.ComputeHash(new MemoryStream(data));
-uint h32_4 = await xxHash32.ComputeHashAsync(new MemoryStream(data));
+uint h32_3 = xxHash32.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
+uint h32_4 = xxHash32.ComputeHash(new MemoryStream(data));
+uint h32_5 = await xxHash32.ComputeHashAsync(new MemoryStream(data));
 ```
 ---
 <p align="center">
