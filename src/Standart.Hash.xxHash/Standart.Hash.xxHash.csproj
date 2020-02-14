@@ -7,17 +7,6 @@
   
   <Import Project="..\..\nuget.props" />
   
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <Optimize>false</Optimize>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  
   <ItemGroup>
     <PackageReference Include="System.Buffers" Version="$(SystemBuffers)" />
 	  <PackageReference Include="System.IO" Version="$(SystemIO)" />
