@@ -1,23 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  
   <Import Project="..\..\nuget.props" />
+  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Optimize>false</Optimize>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>full</DebugType>
   </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="System.Buffers" Version="$(SystemBuffers)" />
-	<PackageReference Include="System.IO" Version="$(SystemIO)" />
+	  <PackageReference Include="System.IO" Version="$(SystemIO)" />
     <PackageReference Include="System.Memory" Version="$(SystemMemory)" />
-	<PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemTasks)" />
+	  <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemTasks)" />
   </ItemGroup>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
+  
 </Project>
