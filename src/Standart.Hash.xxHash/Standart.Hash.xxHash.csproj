@@ -1,15 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
+  <Import Project="..\..\nuget.props" />
+  
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; netcoreapp3.1; net48;</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   
-  <Import Project="..\..\nuget.props" />
-  
-  <ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0' OR $(TargetFramework) == 'net48'">
     <PackageReference Include="System.Buffers" Version="$(SystemBuffers)" />
-	  <PackageReference Include="System.IO" Version="$(SystemIO)" />
     <PackageReference Include="System.Memory" Version="$(SystemMemory)" />
 	  <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemTasks)" />
   </ItemGroup>
