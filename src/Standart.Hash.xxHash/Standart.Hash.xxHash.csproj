@@ -12,5 +12,9 @@
     <PackageReference Include="System.Memory" Version="$(SystemMemory)" />
 	  <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemTasks)" />
   </ItemGroup>
+
+  <PropertyGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
+    <DefineConstants>FCL_BITOPS</DefineConstants>
+  </PropertyGroup>
   
 </Project>
