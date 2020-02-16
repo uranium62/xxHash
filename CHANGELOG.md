@@ -1,3 +1,6 @@
+# 2019-02-16
+- Migrated to net core v.3.1
+- Added bit operation utils
 # 2019-12-15
 - Added support for ArraySegment (thanks ksmith3036)
 # 2018-03-11
