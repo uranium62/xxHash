@@ -10,6 +10,6 @@
     <PackageTags>hash;xxHash</PackageTags>
     <Description>Standart.Hash.xxHash</Description>
     <PackageProjectUrl>https://github.com/uranium62/xxHash</PackageProjectUrl>
-	<PackageIconUrl>https://user-images.githubusercontent.com/1567570/40082382-837fbc3c-5899-11e8-8c74-ac1a48b6b9b3.png</PackageIconUrl>
+	<PackageIcon>https://user-images.githubusercontent.com/1567570/40082382-837fbc3c-5899-11e8-8c74-ac1a48b6b9b3.png</PackageIcon>
   </PropertyGroup>
 </Project>
