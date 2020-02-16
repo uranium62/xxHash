@@ -5,6 +5,8 @@ test: off
 before_build:
   - choco install opencover.portable
   - choco install codecov
+  
+image: Visual Studio 2019
 
 install:
   - ps: $env:DOTNET_BUILD_VERSION = $env:APPVEYOR_BUILD_NUMBER
