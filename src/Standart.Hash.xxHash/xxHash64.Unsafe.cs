@@ -111,7 +111,7 @@
             if (ptr <= end - 4)
             {
                 h64 ^= *((uint*)ptr) * p1;
-                h64 = BitUtils.RotateLeft(h64, 23) * p2 + p3; // (rotl 27) * p2 + p3
+                h64 = BitUtils.RotateLeft(h64, 23) * p2 + p3; // (rotl 23) * p2 + p3
                 ptr += 4;
             }
 
