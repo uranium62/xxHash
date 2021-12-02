@@ -18,7 +18,7 @@
         /// <param name="seed"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe ulong UnsafeComputeHash(byte* ptr, int length, ulong seed)
+        public static unsafe ulong UnsafeComputeHash(byte* ptr, int length, ulong seed)
         {
             byte* end = ptr + length;
             ulong h64;
