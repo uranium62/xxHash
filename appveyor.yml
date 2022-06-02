@@ -5,6 +5,8 @@ test: off
 before_build:
   - choco install opencover.portable
   - choco install codecov
+  
+image: Visual Studio 2019
 
 install:
   - ps: $env:DOTNET_BUILD_VERSION = $env:APPVEYOR_BUILD_NUMBER
@@ -22,6 +24,6 @@ test_script:
 deploy:
   provider: NuGet
   api_key:
-    secure: 8pM4+if5zngi9oyp1fWIdzdJBs0A2upEaLl+VL6L+rFEDSjEbUtit6k0OrPbDM/n
+    secure: Gqt0hcrPJjXnwbp002k7UPsb+3IoUWxKc5qcNyQrFrv1WyjCB1Y0J/cB0P27LWIK
   skip_symbols: true
   artifact: /.*\.nupkg/

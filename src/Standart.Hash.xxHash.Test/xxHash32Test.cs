@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -13,14 +14,17 @@
             // Arrange
             byte[] data = {0xde};
             Span<byte> span = new Span<byte>(data);
+            ReadOnlySpan<byte> rspan = new ReadOnlySpan<byte>(data);
 
             // Act
             uint hash1 = xxHash32.ComputeHash(data, data.Length);
             uint hash2 = xxHash32.ComputeHash(span, span.Length);
+            uint hash3 = xxHash32.ComputeHash(rspan, rspan.Length);
 
             // Assert
             Assert.Equal(hash1, (uint) 0x2330eac0);
             Assert.Equal(hash2, (uint) 0x2330eac0);
+            Assert.Equal(hash3, (uint) 0x2330eac0);
         }
 
         [Fact]
@@ -29,14 +33,17 @@
             // Arrange
             byte[] data = {0xde, 0x55, 0x47, 0x7f, 0x14};
             Span<byte> span = new Span<byte>(data);
+            ReadOnlySpan<byte> rspan = new ReadOnlySpan<byte>(data);
 
             // Act
             uint hash1 = xxHash32.ComputeHash(data, data.Length);
             uint hash2 = xxHash32.ComputeHash(span, span.Length);
+            uint hash3 = xxHash32.ComputeHash(rspan, rspan.Length);
 
             // Assert
             Assert.Equal(hash1, (uint) 0x112348ba);
             Assert.Equal(hash2, (uint) 0x112348ba);
+            Assert.Equal(hash3, (uint) 0x112348ba);
         }
 
         [Fact]
@@ -49,14 +56,17 @@
                 0x22, 0x3a, 0x40, 0x96, 0x56, 0xc5, 0xdc, 0xbb
             };
             Span<byte> span = new Span<byte>(data);
+            ReadOnlySpan<byte> rspan = new ReadOnlySpan<byte>(data);
 
             // Act
             uint hash1 = xxHash32.ComputeHash(data, data.Length);
             uint hash2 = xxHash32.ComputeHash(span, span.Length);
+            uint hash3 = xxHash32.ComputeHash(rspan, rspan.Length);
 
             // Assert
             Assert.Equal(hash1, (uint) 0xcdf89609);
             Assert.Equal(hash2, (uint) 0xcdf89609);
+            Assert.Equal(hash3, (uint) 0xcdf89609);
         }
 
         [Fact]
@@ -70,14 +80,17 @@
                 0x0e
             };
             Span<byte> span = new Span<byte>(data);
+            ReadOnlySpan<byte> rspan = new ReadOnlySpan<byte>(data);
 
             // Act
             uint hash1 = xxHash32.ComputeHash(data, data.Length);
             uint hash2 = xxHash32.ComputeHash(span, span.Length);
+            uint hash3 = xxHash32.ComputeHash(rspan, rspan.Length);
 
             // Assert
             Assert.Equal(hash1, (uint) 0xbca8f924);
             Assert.Equal(hash2, (uint) 0xbca8f924);
+            Assert.Equal(hash3, (uint) 0xbca8f924);
         }
 
         [Fact]
@@ -91,14 +104,17 @@
                 0x0e, 0x59, 0x4d, 0x42, 0xc5
             };
             Span<byte> span = new Span<byte>(data);
+            ReadOnlySpan<byte> rspan = new ReadOnlySpan<byte>(data);
 
             // Act
             uint hash1 = xxHash32.ComputeHash(data, data.Length);
             uint hash2 = xxHash32.ComputeHash(span, span.Length);
+            uint hash3 = xxHash32.ComputeHash(rspan, rspan.Length);
 
             // Assert
             Assert.Equal(hash1, (uint) 0xf4518e14);
             Assert.Equal(hash2, (uint) 0xf4518e14);
+            Assert.Equal(hash3, (uint) 0xf4518e14);
         }
         
         [Fact]
@@ -113,14 +129,17 @@
                 0x1c, 0x2c, 0xc9, 0x38, 0x7d, 0x43, 0x83, 0x11,
             };
             Span<byte> span = new Span<byte>(data);
+            ReadOnlySpan<byte> rspan = new ReadOnlySpan<byte>(data);
 
             // Act
             uint hash1 = xxHash32.ComputeHash(data, data.Length);
             uint hash2 = xxHash32.ComputeHash(span, span.Length);
+            uint hash3 = xxHash32.ComputeHash(rspan, rspan.Length);
 
             // Assert
             Assert.Equal(hash1, (uint) 0xf8497daa);
             Assert.Equal(hash2, (uint) 0xf8497daa);
+            Assert.Equal(hash3, (uint) 0xf8497daa);
         }
 
         [Fact]
@@ -347,6 +366,29 @@
 
             // Assert
             Assert.Equal(hash, (uint) 0xf8497daa);
+        }
+        
+        [Fact]
+        public async Task Compute_hash32_for_the_async_stream_32_with_cancelation_token()
+        {
+            // Arrange
+            byte[] data = new byte[]
+            {
+                0xde, 0x55, 0x47, 0x7f, 0x14, 0x8f, 0xf1, 0x48,
+                0x22, 0x3a, 0x40, 0x96, 0x56, 0xc5, 0xdc, 0xbb,
+                0x0e, 0x59, 0x4d, 0x42, 0xc5, 0x07, 0x21, 0x08,
+                0x1c, 0x2c, 0xc9, 0x38, 0x7d, 0x43, 0x83, 0x11,
+            };
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+            
+            // Act
+            tokenSource.Cancel();
+            
+            // Assert
+            await Assert.ThrowsAsync<TaskCanceledException>(async () =>
+            {
+                await xxHash32.ComputeHashAsync(new MemoryStream(data), 4096, 0, tokenSource.Token);
+            });
         }
 
         [Fact]

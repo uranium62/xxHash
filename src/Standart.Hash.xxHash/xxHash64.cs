@@ -1,167 +1,261 @@
-﻿namespace Standart.Hash.xxHash
+// ReSharper disable InconsistentNaming
+
+using System;
+using System.Buffers;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Standart.Hash.xxHash;
+
+public static partial class xxHash64
 {
-    using System;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-
-    public static partial class xxHash64
+    /// <summary>
+    /// Compute xxHash for the data byte array
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="length">The length of the data for hashing</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe ulong ComputeHash(byte[] data, int length, ulong seed = 0)
     {
-        private const ulong p1 = 11400714785074694791UL;
-        private const ulong p2 = 14029467366897019727UL;
-        private const ulong p3 =  1609587929392839161UL;
-        private const ulong p4 =  9650029242287828579UL;
-        private const ulong p5 =  2870177450012600261UL;
+        Debug.Assert(data != null);
+        Debug.Assert(length >= 0);
+        Debug.Assert(length <= data.Length);
 
-        /// <summary>
-        /// Compute xxHash for the data byte array
-        /// </summary>
-        /// <param name="data">The source of data</param>
-        /// <param name="length">The length of the data for hashing</param>
-        /// <param name="seed">The seed number</param>
-        /// <returns>hash</returns>
-        public static unsafe ulong ComputeHash(byte[] data, int length, ulong seed = 0)
+        fixed (byte* pData = &data[0])
         {
-            Debug.Assert(data != null);
-            Debug.Assert(length >= 0);
-            Debug.Assert(length <= data.Length);
-            
-            fixed (byte* pData = &data[0])
+            return UnsafeComputeHash(pData, length, seed);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the data byte array
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="length">The length of the data for hashing</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe ulong ComputeHash(byte[] data, int offset, int length, ulong seed = 0)
+    {
+        Debug.Assert(data != null);
+        Debug.Assert(length >= 0);
+        Debug.Assert(offset < data.Length);
+        Debug.Assert(length <= data.Length - offset);
+
+        fixed (byte* pData = &data[0 + offset])
+        {
+            return UnsafeComputeHash(pData, length, seed);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the data byte array
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe ulong ComputeHash(System.ArraySegment<byte> data, ulong seed = 0)
+    {
+        Debug.Assert(data != null);
+
+        return ComputeHash(data.Array, data.Offset, data.Count, seed);
+    }
+
+    /// <summary>
+    /// Compute xxHash for the async stream
+    /// </summary>
+    /// <param name="stream">The stream of data</param>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>The hash</returns>
+    public static async ValueTask<ulong> ComputeHashAsync(Stream stream, int bufferSize = 8192, ulong seed = 0)
+    {
+        return await ComputeHashAsync(stream, bufferSize, seed, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Compute xxHash for the async stream
+    /// </summary>
+    /// <param name="stream">The stream of data</param>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="seed">The seed number</param>
+    /// <param name="cancellationToken">The cancelation token</param>
+    /// <returns>The hash</returns>
+    public static async ValueTask<ulong> ComputeHashAsync(Stream stream, int bufferSize, ulong seed,
+        CancellationToken cancellationToken)
+    {
+        Debug.Assert(stream != null);
+        Debug.Assert(bufferSize > 32);
+
+        // Optimizing memory allocation
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize + 32);
+
+        int readBytes;
+        int offset = 0;
+        long length = 0;
+
+        // Prepare the seed vector
+        ulong v1 = seed + XXH_PRIME64_1 + XXH_PRIME64_2;
+        ulong v2 = seed + XXH_PRIME64_2;
+        ulong v3 = seed + 0;
+        ulong v4 = seed - XXH_PRIME64_1;
+
+        try
+        {
+            // Read flow of bytes
+            while ((readBytes =
+                       await stream.ReadAsync(buffer, offset, bufferSize, cancellationToken).ConfigureAwait(false)) > 0)
             {
-                return UnsafeComputeHash(pData, length, seed);
+                length = length + readBytes;
+                offset = offset + readBytes;
+
+                if (offset < 32) continue;
+
+                int r = offset % 32; // remain
+                int l = offset - r; // length
+
+                // Process the next chunk 
+                __XXH64_stream_align(buffer, l, ref v1, ref v2, ref v3, ref v4);
+
+                // Put remaining bytes to buffer
+                Utils.BlockCopy(buffer, l, buffer, 0, r);
+                offset = r;
             }
+
+            // Process the final chunk
+            ulong h64 = __XXH64_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
+
+            return h64;
         }
-        
-        /// <summary>
-        /// Compute xxHash for the data byte span
-        /// </summary>
-        /// <param name="data">The source of data</param>
-        /// <param name="length">The length of the data for hashing</param>
-        /// <param name="seed">The seed number</param>
-        /// <returns>hash</returns>
-        public static unsafe ulong ComputeHash(Span<byte> data, int length, ulong seed = 0)
+        finally
         {
-            Debug.Assert(data != null);
-            Debug.Assert(length >= 0);
-            Debug.Assert(length <= data.Length);
-            
-            fixed (byte* pData = &data[0])
+            // Free memory
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the data byte span
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="length">The length of the data for hashing</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe ulong ComputeHash(Span<byte> data, int length, ulong seed = 0)
+    {
+        Debug.Assert(data != null);
+        Debug.Assert(length >= 0);
+        Debug.Assert(length <= data.Length);
+
+        fixed (byte* pData = &MemoryMarshal.GetReference(data))
+        {
+            return UnsafeComputeHash(pData, length, seed);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the data byte span
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="length">The length of the data for hashing</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe ulong ComputeHash(ReadOnlySpan<byte> data, int length, ulong seed = 0)
+    {
+        Debug.Assert(data != null);
+        Debug.Assert(length >= 0);
+        Debug.Assert(length <= data.Length);
+
+        fixed (byte* pData = &MemoryMarshal.GetReference(data))
+        {
+            return UnsafeComputeHash(pData, length, seed);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the stream
+    /// </summary>
+    /// <param name="stream">The stream of data</param>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>The hash</returns>
+    public static ulong ComputeHash(Stream stream, int bufferSize = 8192, ulong seed = 0)
+    {
+        Debug.Assert(stream != null);
+        Debug.Assert(bufferSize > 32);
+
+        // Optimizing memory allocation
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize + 32);
+
+        int readBytes;
+        int offset = 0;
+        long length = 0;
+
+        // Prepare the seed vector
+        ulong v1 = seed + XXH_PRIME64_1 + XXH_PRIME64_2;
+        ulong v2 = seed + XXH_PRIME64_2;
+        ulong v3 = seed + 0;
+        ulong v4 = seed - XXH_PRIME64_1;
+
+        try
+        {
+            // Read flow of bytes
+            while ((readBytes = stream.Read(buffer, offset, bufferSize)) > 0)
             {
-                return UnsafeComputeHash(pData, length, seed);
+                length = length + readBytes;
+                offset = offset + readBytes;
+
+                if (offset < 32) continue;
+
+                int r = offset % 32; // remain
+                int l = offset - r; // length
+
+                // Process the next chunk 
+                __XXH64_stream_align(buffer, l, ref v1, ref v2, ref v3, ref v4);
+
+                // Put remaining bytes to buffer
+                Utils.BlockCopy(buffer, l, buffer, 0, r);
+                offset = r;
             }
-        }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe ulong UnsafeComputeHash(byte* ptr, int length, ulong seed)
+            // Process the final chunk
+            ulong h64 = __XXH64_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
+
+            return h64;
+        }
+        finally
         {
-                byte* end = ptr + length;
-                ulong h64;
-
-                if (length >= 32)
-                {
-                    byte* limit = end - 32;
-
-                    ulong v1 = seed + p1 + p2;
-                    ulong v2 = seed + p2;
-                    ulong v3 = seed + 0;
-                    ulong v4 = seed - p1;
-
-                    do
-                    {
-                        v1 += *((ulong*)ptr) * p2;
-                        v1 = (v1 << 31) | (v1 >> (64 - 31)); // rotl 31
-                        v1 *= p1;
-                        ptr += 8;
-
-                        v2 += *((ulong*)ptr) * p2;
-                        v2 = (v2 << 31) | (v2 >> (64 - 31)); // rotl 31
-                        v2 *= p1;
-                        ptr += 8;
-
-                        v3 += *((ulong*)ptr) * p2;
-                        v3 = (v3 << 31) | (v3 >> (64 - 31)); // rotl 31
-                        v3 *= p1;
-                        ptr += 8;
-
-                        v4 += *((ulong*)ptr) * p2;
-                        v4 = (v4 << 31) | (v4 >> (64 - 31)); // rotl 31
-                        v4 *= p1;
-                        ptr += 8;
-
-                    } while (ptr <= limit);
-
-                    h64 = ((v1 << 1) | (v1 >> (64 - 1))) +   // rotl 1
-                          ((v2 << 7) | (v2 >> (64 - 7))) +   // rotl 7
-                          ((v3 << 12) | (v3 >> (64 - 12))) + // rotl 12
-                          ((v4 << 18) | (v4 >> (64 - 18)));  // rotl 18
-
-                    // merge round
-                    v1 *= p2;
-                    v1 = (v1 << 31) | (v1 >> (64 - 31)); // rotl 31
-                    v1 *= p1;
-                    h64 ^= v1;
-                    h64 = h64 * p1 + p4;
-
-                    // merge round
-                    v2 *= p2;
-                    v2 = (v2 << 31) | (v2 >> (64 - 31)); // rotl 31
-                    v2 *= p1;
-                    h64 ^= v2;
-                    h64 = h64 * p1 + p4;
-
-                    // merge round
-                    v3 *= p2;
-                    v3 = (v3 << 31) | (v3 >> (64 - 31)); // rotl 31
-                    v3 *= p1;
-                    h64 ^= v3;
-                    h64 = h64 * p1 + p4;
-
-                    // merge round
-                    v4 *= p2;
-                    v4 = (v4 << 31) | (v4 >> (64 - 31)); // rotl 31
-                    v4 *= p1;
-                    h64 ^= v4;
-                    h64 = h64 * p1 + p4;
-                }
-                else
-                {
-                    h64 = seed + p5;
-                }
-
-                h64 += (ulong) length;
-
-                // finalize
-                while (ptr <= end - 8)
-                {
-                    ulong t1 = *((ulong*)ptr) * p2;
-                    t1 = (t1 << 31) | (t1 >> (64 - 31)); // rotl 31
-                    t1 *= p1;
-                    h64 ^= t1;
-                    h64 = ((h64 << 27) | (h64 >> (64 - 27))) * p1 + p4; // (rotl 27) * p1 + p4
-                    ptr += 8;
-                }
-                
-                if (ptr <= end - 4)
-                {
-                    h64 ^= *((uint*)ptr) * p1;
-                    h64 = ((h64 << 23) | (h64 >> (64 - 23))) * p2 + p3; // (rotl 27) * p2 + p3
-                    ptr += 4;
-                }
-
-                while (ptr < end)
-                {
-                    h64 ^= *((byte*)ptr) * p5;
-                    h64 = ((h64 << 11) | (h64 >> (64 - 11))) * p1; // (rotl 11) * p1
-                    ptr += 1;
-                }
-
-                // avalanche
-                h64 ^= h64 >> 33;
-                h64 *= p2;
-                h64 ^= h64 >> 29;
-                h64 *= p3;
-                h64 ^= h64 >> 32;
-
-                return h64;
+            // Free memory
+            ArrayPool<byte>.Shared.Return(buffer);
         }
+    }
+    
+    /// <summary>
+    /// Compute xxHash for the string 
+    /// </summary>
+    /// <param name="str">The source of data</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe ulong ComputeHash(string str, uint seed = 0)
+    {
+        Debug.Assert(str != null);
+
+        fixed (char* c = str)
+        {
+            byte* ptr = (byte*) c;
+            int length = str.Length;
+
+            return UnsafeComputeHash(ptr, length, seed);
+        }
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static unsafe ulong UnsafeComputeHash(byte* ptr, int length, ulong seed)
+    {
+        return XXH64_internal(ptr, length, seed);
     }
 }

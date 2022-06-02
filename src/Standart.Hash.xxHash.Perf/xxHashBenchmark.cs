@@ -8,7 +8,7 @@
     [RPlotExporter, RankColumn]
     [MinColumn, MaxColumn]
     [MemoryDiagnoser]
-    //[DisassemblyDiagnoser(printAsm: true, printSource: true)]
+    // [DisassemblyDiagnoser(printAsm: true, printSource: true)]
     public class xxHashBenchmark
     {
         const int KB = 1024;
@@ -24,8 +24,10 @@
         [GlobalSetup]
         public void Setup()
         {
+            Random rand = new Random(42);
+
             data = new byte[N];
-            new Random(42).NextBytes(data);
+            rand.NextBytes(data);
             stream = new MemoryStream(data);
         }
         
@@ -39,6 +41,13 @@
         public uint Hash32_Span()
         {
             Span<byte> span = new Span<byte>(data);
+            return xxHash32.ComputeHash(span, span.Length);
+        }
+        
+        [Benchmark]
+        public uint Hash32_ReadOnlySpan()
+        {
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(data);
             return xxHash32.ComputeHash(span, span.Length);
         }
 
@@ -66,6 +75,13 @@
         public ulong Hash64_Span()
         {
             Span<byte> span = new Span<byte>(data);
+            return xxHash64.ComputeHash(span, span.Length);
+        }
+        
+        [Benchmark]
+        public ulong Hash64_ReadOnlySpan()
+        {
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(data);
             return xxHash64.ComputeHash(span, span.Length);
         }
         

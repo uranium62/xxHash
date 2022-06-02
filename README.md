@@ -15,7 +15,7 @@
     <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
-    <img src="https://img.shields.io/badge/nuget-1.0.5-green.svg?style=flat-square" alt="nuget"/>
+    <img src="https://img.shields.io/badge/nuget-1.0.6-green.svg?style=flat-square" alt="nuget"/>
   </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
     <img src="https://img.shields.io/badge/platform-x64-blue.svg?longCache=true" alt="platform"/>
@@ -44,17 +44,27 @@ This benchmark was launched on a **Windows 10 (10.0.16299.309)**. The reference 
 | Hash32 Stream | 3.22 GB/s |
 | Hash64 Stream | 4.81 GB/s |
 
+## Comparison between С# and C implementation
+
+| Method | Platform | Language |  1KB Time |  1MB Time |  1GB Time |     Speed | Difference |
+|--------|---------:|---------:|----------:|----------:|----------:|----------:|-----------:| 
+| Hash32 |      x64 |       C# |  185.1 ns |  170.6 us |  193.6 ms | 5.16 GB/s |      1.4 % |
+| Hash32 |      x64 |       C  |  183.5 ns |  170.1 us |  190.8 ms | 5.24 GB/s |      1.4 % |
+| Hash64 |      x64 |       C# |  117.3 ns |   87.1 us |  116.9 ms | 8.55 GB/s |      2.4 % |
+| Hash64 |      x64 |       C  |  104.8 ns |   85.3 us |  114.1 ms | 8.76 GB/s |      2.4 % |
+
+
 ## Api
 ```cs
 public static uint ComputeHash(byte[] data, int length, uint seed = 0) { throw null; }
 public static uint ComputeHash(Span<byte> data, int length, uint seed = 0) { throw null; }
 public static uint ComputeHash(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
-public static async Task<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
+public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
 
 public static ulong ComputeHash(byte[] data, int length, ulong seed = 0) { throw null; }
 public static ulong ComputeHash(Span<byte> data, int length, ulong seed = 0) { throw null; }
 public static ulong ComputeHash(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
-public static async Task<ulong> ComputeHashAsync(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
+public static async ValueTask<ulong> ComputeHashAsync(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
 ```
 
 ## Examples
@@ -63,12 +73,16 @@ A few examples of how to use api
 byte[] data = Encoding.UTF8.GetBytes("veni vidi vici");
 
 ulong h64_1 = xxHash64.ComputeHash(data, data.Length);
-ulong h64_2 = xxHash64.ComputeHash(new MemoryStream(data));
-ulong h64_3 = await xxHash64.ComputeHashAsync(new MemoryStream(data));
+ulong h64_2 = xxHash64.ComputeHash(new Span<byte>(data), data.Length);
+ulong h64_3 = xxHash64.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
+ulong h64_4 = xxHash64.ComputeHash(new MemoryStream(data));
+ulong h64_5 = await xxHash64.ComputeHashAsync(new MemoryStream(data));
 
 uint h32_1 = xxHash32.ComputeHash(data, data.Length);
-uint h32_2 = xxHash32.ComputeHash(new MemoryStream(data));
-uint h32_3 = await xxHash32.ComputeHashAsync(new MemoryStream(data));
+uint h32_2 = xxHash32.ComputeHash(new Span<byte>(data), data.Length);
+uint h32_3 = xxHash32.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
+uint h32_4 = xxHash32.ComputeHash(new MemoryStream(data));
+uint h32_5 = await xxHash32.ComputeHashAsync(new MemoryStream(data));
 ```
 ---
 <p align="center">

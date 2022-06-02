@@ -1,129 +1,262 @@
-﻿namespace Standart.Hash.xxHash
+// ReSharper disable InconsistentNaming
+
+using System;
+using System.Buffers;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Standart.Hash.xxHash;
+
+public static partial class xxHash32
 {
-    using System;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-
-    public static partial class xxHash32
+    /// <summary>
+    /// Compute xxHash for the data byte array
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="length">The length of the data for hashing</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe uint ComputeHash(byte[] data, int length, uint seed = 0)
     {
-        private const uint p1 = 2654435761U;
-        private const uint p2 = 2246822519U;
-        private const uint p3 = 3266489917U;
-        private const uint p4 = 668265263U;
-        private const uint p5 = 374761393U;
+        Debug.Assert(data != null);
+        Debug.Assert(length >= 0);
+        Debug.Assert(length <= data.Length);
 
-        /// <summary>
-        /// Compute xxHash for the data byte array
-        /// </summary>
-        /// <param name="data">The source of data</param>
-        /// <param name="length">The length of the data for hashing</param>
-        /// <param name="seed">The seed number</param>
-        /// <returns>hash</returns>
-        public static unsafe uint ComputeHash(byte[] data, int length, uint seed = 0)
+        fixed (byte* pData = &data[0])
         {
-            Debug.Assert(data != null);
-            Debug.Assert(length >= 0);
-            Debug.Assert(length <= data.Length);
-            
-            fixed (byte* pData = &data[0])
-            {
-                return UnsafeComputeHash(pData, length, seed);
-            }
+            return UnsafeComputeHash(pData, length, seed);
         }
+    }
 
-        /// <summary>
-        /// Compute xxHash for the data byte span 
-        /// </summary>
-        /// <param name="data">The source of data</param>
-        /// <param name="length">The length of the data for hashing</param>
-        /// <param name="seed">The seed number</param>
-        /// <returns>hash</returns>
-        public static unsafe uint ComputeHash(Span<byte> data, int length, uint seed = 0)
+    /// <summary>
+    /// Compute xxHash for the data byte array
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="offset">The offset of the data for hashing</param>
+    /// <param name="length">The length of the data for hashing</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe uint ComputeHash(byte[] data, int offset, int length, uint seed = 0)
+    {
+        Debug.Assert(data != null);
+        Debug.Assert(length >= 0);
+        Debug.Assert(offset < data.Length);
+        Debug.Assert(length <= data.Length - offset);
+
+        fixed (byte* pData = &data[0 + offset])
         {
-            Debug.Assert(data != null);
-            Debug.Assert(length >= 0);
-            Debug.Assert(length <= data.Length);
-            
-            fixed (byte* pData = &data[0])
+            return UnsafeComputeHash(pData, length, seed);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the data byte array
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static ulong ComputeHash(ArraySegment<byte> data, uint seed = 0)
+    {
+        Debug.Assert(data != null);
+
+        return ComputeHash(data.Array, data.Offset, data.Count, seed);
+    }
+
+    /// <summary>
+    /// Compute xxHash for the async stream
+    /// </summary>
+    /// <param name="stream">The stream of data</param>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>The hash</returns>
+    public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0)
+    {
+        return await ComputeHashAsync(stream, bufferSize, seed, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Compute xxHash for the async stream
+    /// </summary>
+    /// <param name="stream">The stream of data</param>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="seed">The seed number</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>The hash</returns>
+    public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize, uint seed,
+        CancellationToken cancellationToken)
+    {
+        Debug.Assert(stream != null);
+        Debug.Assert(bufferSize > 16);
+
+        // Optimizing memory allocation
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize + 16);
+
+        int readBytes;
+        int offset = 0;
+        long length = 0;
+
+        // Prepare the seed vector
+        uint v1 = seed + XXH_PRIME32_1 + XXH_PRIME32_2;
+        uint v2 = seed + XXH_PRIME32_2;
+        uint v3 = seed + 0;
+        uint v4 = seed - XXH_PRIME32_1;
+
+        try
+        {
+            // Read flow of bytes
+            while ((readBytes =
+                       await stream.ReadAsync(buffer, offset, bufferSize, cancellationToken).ConfigureAwait(false)) > 0)
             {
-                return UnsafeComputeHash(pData, length, seed);
+                length = length + readBytes;
+                offset = offset + readBytes;
+
+                if (offset < 16) continue;
+
+                int r = offset % 16; // remain
+                int l = offset - r; // length
+
+                // Process the next chunk 
+                __XXH32_stream_align(buffer, l, ref v1, ref v2, ref v3, ref v4);
+
+                // Put remaining bytes to buffer
+                Utils.BlockCopy(buffer, l, buffer, 0, r);
+                offset = r;
             }
+
+            // Process the final chunk
+            uint h32 = __XXH32_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
+
+            return h32;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe uint UnsafeComputeHash(byte* ptr, int length, uint seed)
-        {           
-                byte* end = ptr + length;
-                uint h32;
-
-                if (length >= 16)
-                {
-                    byte* limit = end - 16;
-
-                    uint v1 = seed + p1 + p2;
-                    uint v2 = seed + p2;
-                    uint v3 = seed + 0;
-                    uint v4 = seed - p1;
-
-                    do
-                    {
-                        v1 += *((uint*)ptr) * p2;
-                        v1 = (v1 << 13) | (v1 >> (32 - 13)); // rotl 13
-                        v1 *= p1;
-                        ptr += 4;
-
-                        v2 += *((uint*)ptr) * p2;
-                        v2 = (v2 << 13) | (v2 >> (32 - 13)); // rotl 13
-                        v2 *= p1;
-                        ptr += 4;
-
-                        v3 += *((uint*)ptr) * p2;
-                        v3 = (v3 << 13) | (v3 >> (32 - 13)); // rotl 13
-                        v3 *= p1;
-                        ptr += 4;
-
-                        v4 += *((uint*)ptr) * p2;
-                        v4 = (v4 << 13) | (v4 >> (32 - 13)); // rotl 13
-                        v4 *= p1;
-                        ptr += 4;
-
-                    } while (ptr <= limit);
-
-                    h32 = ((v1 << 1) | (v1 >> (32 - 1))) +   // rotl 1
-                          ((v2 << 7) | (v2 >> (32 - 7))) +   // rotl 7
-                          ((v3 << 12) | (v3 >> (32 - 12))) + // rotl 12
-                          ((v4 << 18) | (v4 >> (32 - 18)));  // rotl 18
-                }
-                else
-                {
-                    h32 = seed + p5;
-                }
-
-                h32 += (uint) length;
-
-                // finalize
-                while (ptr <= end - 4)
-                {
-                    h32 += *((uint*)ptr) * p3;
-                    h32 = ((h32 << 17) | (h32 >> (32 - 17))) * p4; // (rotl 17) * p4
-                    ptr += 4;
-                }
-
-                while (ptr < end)
-                {
-                    h32 += *((byte*)ptr) * p5;
-                    h32 = ((h32 << 11) | (h32 >> (32 - 11))) * p1; // (rotl 11) * p1
-                    ptr += 1;
-                }
-
-                // avalanche
-                h32 ^= h32 >> 15;
-                h32 *= p2;
-                h32 ^= h32 >> 13;
-                h32 *= p3;
-                h32 ^= h32 >> 16;
-
-                return h32;
+        finally
+        {
+            // Free memory
+            ArrayPool<byte>.Shared.Return(buffer);
         }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the data byte span 
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="length">The length of the data for hashing</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe uint ComputeHash(Span<byte> data, int length, uint seed = 0)
+    {
+        Debug.Assert(data != null);
+        Debug.Assert(length >= 0);
+        Debug.Assert(length <= data.Length);
+
+        fixed (byte* pData = &MemoryMarshal.GetReference(data))
+        {
+            return UnsafeComputeHash(pData, length, seed);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the data byte span 
+    /// </summary>
+    /// <param name="data">The source of data</param>
+    /// <param name="length">The length of the data for hashing</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe uint ComputeHash(ReadOnlySpan<byte> data, int length, uint seed = 0)
+    {
+        Debug.Assert(data != null);
+        Debug.Assert(length >= 0);
+        Debug.Assert(length <= data.Length);
+
+        fixed (byte* pData = &MemoryMarshal.GetReference(data))
+        {
+            return UnsafeComputeHash(pData, length, seed);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the stream
+    /// </summary>
+    /// <param name="stream">The stream of data</param>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>The hash</returns>
+    public static uint ComputeHash(Stream stream, int bufferSize = 4096, uint seed = 0)
+    {
+        Debug.Assert(stream != null);
+        Debug.Assert(bufferSize > 16);
+
+        // Optimizing memory allocation
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize + 16);
+
+        int readBytes;
+        int offset = 0;
+        long length = 0;
+
+        // Prepare the seed vector
+        uint v1 = seed + XXH_PRIME32_1 + XXH_PRIME32_2;
+        uint v2 = seed + XXH_PRIME32_2;
+        uint v3 = seed + 0;
+        uint v4 = seed - XXH_PRIME32_1;
+
+        try
+        {
+            // Read flow of bytes
+            while ((readBytes = stream.Read(buffer, offset, bufferSize)) > 0)
+            {
+                length = length + readBytes;
+                offset = offset + readBytes;
+
+                if (offset < 16) continue;
+
+                int r = offset % 16; // remain
+                int l = offset - r; // length
+
+                // Process the next chunk 
+                __XXH32_stream_align(buffer, l, ref v1, ref v2, ref v3, ref v4);
+
+                // Put remaining bytes to buffer
+                Utils.BlockCopy(buffer, l, buffer, 0, r);
+                offset = r;
+            }
+
+            // Process the last chunk
+            uint h32 = __XXH32_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
+
+            return h32;
+        }
+        finally
+        {
+            // Free memory
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
+    /// <summary>
+    /// Compute xxHash for the string 
+    /// </summary>
+    /// <param name="str">The source of data</param>
+    /// <param name="seed">The seed number</param>
+    /// <returns>hash</returns>
+    public static unsafe uint ComputeHash(string str, uint seed = 0)
+    {
+        Debug.Assert(str != null);
+
+        fixed (char* c = str)
+        {
+            byte* ptr = (byte*) c;
+            int length = str.Length;
+
+            return UnsafeComputeHash(ptr, length, seed);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static unsafe uint UnsafeComputeHash(byte* ptr, int length, uint seed)
+    {
+        return XXH32_internal(ptr, length, seed);
     }
 }
