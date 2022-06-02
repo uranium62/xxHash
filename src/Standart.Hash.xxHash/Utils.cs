@@ -208,8 +208,6 @@ namespace Standart.Hash.xxHash
                         *(long*)(ptrDst + 16) = *(long*)(ptrSrc + 16);
                         *(long*)(ptrDst + 24) = *(long*)(ptrSrc + 24);
                         return;
-                    default:
-                        break;
                 }
     
                 long* lpSrc = (long*)ptrSrc;
@@ -244,7 +242,7 @@ namespace Standart.Hash.xxHash
                 ptrSrc = (byte*)lpSrc;
                 ptrDst = (byte*)ldSrc;
                 goto SMALLTABLE;
-                }
+            }
         }
     }
 }

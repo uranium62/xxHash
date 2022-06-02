@@ -35,7 +35,7 @@ namespace Standart.Hash.xxHash
         /// <param name="length">The length of the data for hashing</param>
         /// <param name="seed">The seed number</param>
         /// <returns>hash</returns>
-        public static unsafe uint128 ComputeHash(Span<byte> data, int length, uint seed = 0)
+        public static unsafe uint128 ComputeHash(Span<byte> data, int length, ulong seed = 0)
         {
             Debug.Assert(data != null);
             Debug.Assert(length >= 0);
@@ -54,7 +54,7 @@ namespace Standart.Hash.xxHash
         /// <param name="length">The length of the data for hashing</param>
         /// <param name="seed">The seed number</param>
         /// <returns>hash</returns>
-        public static unsafe uint128 ComputeHash(ReadOnlySpan<byte> data, int length, uint seed = 0)
+        public static unsafe uint128 ComputeHash(ReadOnlySpan<byte> data, int length, ulong seed = 0)
         {
             Debug.Assert(data != null);
             Debug.Assert(length >= 0);
@@ -67,12 +67,12 @@ namespace Standart.Hash.xxHash
         }
         
         /// <summary>
-        /// Compute xxHash for the data byte span 
+        /// Compute xxHash for the string 
         /// </summary>
         /// <param name="str">The source of data</param>
         /// <param name="seed">The seed number</param>
         /// <returns>hash</returns>
-        public static unsafe uint128 ComputeHash(string str, uint seed = 0)
+        public static unsafe uint128 ComputeHash(string str, ulong seed = 0)
         {
             Debug.Assert(str != null);
             
