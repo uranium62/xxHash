@@ -3,18 +3,8 @@
   <Import Project="..\..\nuget.props" />
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0; netstandard2.1; netcoreapp3.1; net48;</TargetFrameworks>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  
-  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0' OR $(TargetFramework) == 'net48'">
-    <PackageReference Include="System.Buffers" Version="$(SystemBuffers)" />
-    <PackageReference Include="System.Memory" Version="$(SystemMemory)" />
-	  <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemTasks)" />
-  </ItemGroup>
-
-  <PropertyGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
-    <DefineConstants>FCL_BITOPS</DefineConstants>
   </PropertyGroup>
   
 </Project>
