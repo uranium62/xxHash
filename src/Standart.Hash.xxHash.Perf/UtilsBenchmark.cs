@@ -6,7 +6,7 @@
     [RPlotExporter, RankColumn]
     [MinColumn, MaxColumn]
     [MemoryDiagnoser]
-    public class UnsafeBufferBenchmark
+    public class UtilsBenchmark
     {
         private byte[] src;
         private byte[] des;
@@ -33,7 +33,7 @@
         [Benchmark]
         public void UnsafeBufferCopy()
         {
-            UnsafeBuffer.BlockCopy(src, 0, des, 0, 32);
+            Utils.BlockCopy(src, 0, des, 0, 32);
         }
     }
 }

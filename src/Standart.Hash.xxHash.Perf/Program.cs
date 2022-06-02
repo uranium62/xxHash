@@ -7,7 +7,7 @@
         public static void Main(string[] args)
         {
             BenchmarkRunner.Run<xxHashBenchmark>();
-            BenchmarkRunner.Run<UnsafeBufferBenchmark>();
+            BenchmarkRunner.Run<UtilsBenchmark>();
         }
     }
 }
