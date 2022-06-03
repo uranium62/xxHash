@@ -1,3 +1,6 @@
+# 2022-06-03
+- Added xxHash128
+- Migrated to net6
 # 2019-02-16
 - Migrated to net core v.3.1
 - Added bit operation utils

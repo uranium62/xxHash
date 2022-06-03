@@ -1,13 +1,9 @@
 <Project>
   <PropertyGroup>
-	<SystemBuffers>4.5.0</SystemBuffers>
-	<SystemIO>4.3.0</SystemIO>
-	<SystemMemory>4.5.3</SystemMemory>
-	<SystemTasks>4.5.3</SystemTasks>
-	<BenchmarkDotNet>0.12</BenchmarkDotNet>
-	<MicrosoftSdk>16.5.0</MicrosoftSdk>
+	<BenchmarkDotNet>0.13.1</BenchmarkDotNet>
+	<MicrosoftSdk>17.2.0</MicrosoftSdk>
 	<xUnit>2.4.1</xUnit>
-	<xUnitRunner>2.4.1</xUnitRunner>
+	<xUnitRunner>2.4.5</xUnitRunner>
 	<xUnitTool>2.3.1</xUnitTool>
   </PropertyGroup>
 </Project>
