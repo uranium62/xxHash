@@ -1,4 +1,6 @@
-﻿namespace Standart.Hash.xxHash.Test
+﻿using System.Text;
+
+namespace Standart.Hash.xxHash.Test
 {
     using System;
     using System.IO;
@@ -383,5 +385,19 @@
             }
         }
         
+        [Fact]
+        public void Compute_hash64_for_string()
+        {
+            // Arrange
+            var str = "veni vidi vici";
+            var bytes = Encoding.Unicode.GetBytes(str);
+
+            // Act
+            var hash1 = xxHash64.ComputeHash(str);
+            var hash2 = xxHash64.ComputeHash(bytes, bytes.Length);
+            
+            // Assert
+            Assert.Equal(hash1, hash2);
+        }
     }
 }

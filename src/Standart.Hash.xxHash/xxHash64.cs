@@ -247,7 +247,7 @@ public static partial class xxHash64
         fixed (char* c = str)
         {
             byte* ptr = (byte*) c;
-            int length = str.Length;
+            int length = str.Length * 2;
 
             return UnsafeComputeHash(ptr, length, seed);
         }

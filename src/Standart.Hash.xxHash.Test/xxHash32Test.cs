@@ -1,4 +1,6 @@
-﻿namespace Standart.Hash.xxHash.Test
+﻿using System.Text;
+
+namespace Standart.Hash.xxHash.Test
 {
     using System;
     using System.IO;
@@ -419,6 +421,21 @@
                 // Assert
                 Assert.Equal(hash1, hash2);
             }
+        }
+
+        [Fact]
+        public void Compute_hash32_for_string()
+        {
+            // Arrange
+            var str = "veni vidi vici";
+            var bytes = Encoding.Unicode.GetBytes(str);
+
+            // Act
+            var hash1 = xxHash32.ComputeHash(str);
+            var hash2 = xxHash32.ComputeHash(bytes, bytes.Length);
+            
+            // Assert
+            Assert.Equal(hash1, hash2);
         }
     }
 }
