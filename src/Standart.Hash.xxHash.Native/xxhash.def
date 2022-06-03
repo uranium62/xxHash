@@ -1,4 +1,0 @@
-LIBRARY Standart.Hash.xxHash.Native
-EXPORTS
-	XXH32 @1
-	XXH64 @2

@@ -6,8 +6,10 @@
     {
         public static void Main(string[] args)
         {
-            BenchmarkRunner.Run<xxHashBenchmark>();
-            BenchmarkRunner.Run<UtilsBenchmark>();
+            BenchmarkRunner.Run<NativeXXHashBenchmark>();
+
+            // BenchmarkRunner.Run<xxHashBenchmark>();
+            // BenchmarkRunner.Run<UtilsBenchmark>();
         }
     }
 }

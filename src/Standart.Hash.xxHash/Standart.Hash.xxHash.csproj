@@ -11,5 +11,11 @@
     <InternalsVisibleTo Include="$(AssemblyName).Test" />
     <InternalsVisibleTo Include="$(AssemblyName).Perf" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="xxHash.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   
 </Project>

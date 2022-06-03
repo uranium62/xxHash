@@ -1,0 +1,5 @@
+LIBRARY xxHash
+EXPORTS
+	XXH32 @1
+	XXH64 @2
+	XXH3_128bits_withSeed @3
