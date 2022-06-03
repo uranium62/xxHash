@@ -8,16 +8,28 @@ namespace Standart.Hash.xxHash
     {
         public static Guid ToGuid(this uint128 value)
         {
-            // allocation
-            return new Guid(value.ToBytes());
+            var a = (Int32) (value.low64);
+            var b = (Int16) (value.low64 >> 32);
+            var c = (Int16) (value.low64 >> 48);
+            
+            var d = (Byte) (value.high64);
+            var e = (Byte) (value.high64 >> 8);
+            var f = (Byte) (value.high64 >> 16);
+            var g = (Byte) (value.high64 >> 24);
+            var h = (Byte) (value.high64 >> 32);
+            var i = (Byte) (value.high64 >> 40);
+            var j = (Byte) (value.high64 >> 48);
+            var k = (Byte) (value.high64 >> 56);
+            
+            return new Guid(a, b, c, d, e, f,g, h, i, j, k);
         }
 
         public static byte[] ToBytes(this uint128 value)
         {
             // allocation
             byte[] bytes = new byte[sizeof(ulong) * 2];
-            Unsafe.As<byte, ulong>(ref bytes[0]) = value.high64;
-            Unsafe.As<byte, ulong>(ref bytes[8]) = value.low64;
+            Unsafe.As<byte, ulong>(ref bytes[0]) = value.low64;
+            Unsafe.As<byte, ulong>(ref bytes[8]) = value.high64;
             return bytes;
         }
         
