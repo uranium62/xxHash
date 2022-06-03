@@ -60,11 +60,24 @@ public static uint ComputeHash(byte[] data, int length, uint seed = 0) { throw n
 public static uint ComputeHash(Span<byte> data, int length, uint seed = 0) { throw null; }
 public static uint ComputeHash(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
 public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize = 4096, uint seed = 0) { throw null; }
+public static uint ComputeHash(string str, uint seed = 0) { throw null; }
+
 
 public static ulong ComputeHash(byte[] data, int length, ulong seed = 0) { throw null; }
 public static ulong ComputeHash(Span<byte> data, int length, ulong seed = 0) { throw null; }
 public static ulong ComputeHash(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
 public static async ValueTask<ulong> ComputeHashAsync(Stream stream, int bufferSize = 8192, ulong seed = 0) { throw null; }
+public static ulong ComputeHash(string str, uint seed = 0) { throw null; }
+
+public static uint128 ComputeHash(byte[] data, int length, uint seed = 0) { throw null; }
+public static uint128 ComputeHash(Span<byte> data, int length, uint seed = 0) { throw null; }
+public static uint128 ComputeHash(string str, uint seed = 0) { throw null; }
+
+// allocations
+public static byte[] ComputeHashBytes(byte[] data, int length, uint seed = 0) { throw null; }
+public static byte[] ComputeHashBytes(Span<byte> data, int length, uint seed = 0) { throw null; }
+public static byte[] ComputeHashBytes(string str, uint seed = 0) { throw null; }
+
 ```
 
 ## Examples
@@ -77,12 +90,28 @@ ulong h64_2 = xxHash64.ComputeHash(new Span<byte>(data), data.Length);
 ulong h64_3 = xxHash64.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
 ulong h64_4 = xxHash64.ComputeHash(new MemoryStream(data));
 ulong h64_5 = await xxHash64.ComputeHashAsync(new MemoryStream(data));
+ulong h64_6 = xxHash64.ComputeHash("veni vidi vici");
 
 uint h32_1 = xxHash32.ComputeHash(data, data.Length);
 uint h32_2 = xxHash32.ComputeHash(new Span<byte>(data), data.Length);
 uint h32_3 = xxHash32.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
 uint h32_4 = xxHash32.ComputeHash(new MemoryStream(data));
 uint h32_5 = await xxHash32.ComputeHashAsync(new MemoryStream(data));
+uint h32_6 = xxHash32.ComputeHash("veni vidi vici");
+
+uint128 h128_1 = xxHash128.ComputeHash(data, data.Length);
+uint128 h128_2 = xxHash128.ComputeHash(new Span<byte>(data), data.Length);
+uint128 h128_3 = xxHash128.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
+uint128 h128_4 = xxHash128.ComputeHash("veni vidi vici");
+
+Guid guid    = h128_1.ToGuid();
+byte[] bytes = h128_1.ToBytes();
+
+byte[] hash_bytes_1 = xxHash128.ComputeHashBytes(data, data.Length);
+byte[] hash_bytes_2 = xxHash128.ComputeHashBytes(new Span<byte>(data), data.Length);
+byte[] hash_bytes_3 = xxHash128.ComputeHashBytes(new ReadOnlySpan<byte>(data), data.Length);
+byte[] hash_bytes_4 = xxHash128.ComputeHashBytes("veni vidi vici");
+
 ```
 ---
 <p align="center">
