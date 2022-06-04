@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 
 namespace Standart.Hash.xxHash
 {
@@ -86,9 +87,21 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint128 XXH_mult64to128(ulong lhs, ulong rhs)
         {
-            // TODO: SIMD
+            if (Bmi2.IsSupported)
+                return XXH_mult64to128_bmi2(lhs, rhs);
             
             return XXH_mult64to128_scalar(lhs, rhs);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe uint128 XXH_mult64to128_bmi2(ulong lhs, ulong rhs)
+        {
+            ulong product_high;
+            ulong product_low = Bmi2.X64.MultiplyNoFlags(lhs, rhs, &product_high);
+            uint128 r128;
+            r128.low64  = product_low;
+            r128.high64 = product_high;
+            return r128;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -113,6 +126,12 @@ namespace Standart.Hash.xxHash
         private static unsafe void XXH_writeLE64(byte* dst, ulong v64)
         {
             *(ulong*) dst = v64;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static byte _MM_SHUFFLE(byte p3, byte p2, byte p1, byte p0)
+        {
+            return (byte)((p3 << 6) | (p2 << 4) | (p1 << 2) | p0);
         }
     }
 }
