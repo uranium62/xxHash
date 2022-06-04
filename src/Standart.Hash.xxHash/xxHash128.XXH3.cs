@@ -2,6 +2,8 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 
 namespace Standart.Hash.xxHash
 {
@@ -377,9 +379,33 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_accumulate_512(ulong* acc, byte* input, byte* secret)
         {
-            // TODO: SIMD
+            if (Sse2.IsSupported)
+                XXH3_accumulate_512_sse2(acc, input, secret);
+            else
+                XXH3_accumulate_512_scalar(acc, input, secret);
+        }
 
-            XXH3_accumulate_512_scalar(acc, input, secret);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe void XXH3_accumulate_512_sse2(ulong* acc, byte* input, byte* secret)
+        {
+            const int m128i_size = 16;
+
+            for (int i = 0; i < XXH_STRIPE_LEN / m128i_size; i++)
+            {
+                int uint32_offset = i * 4;
+                int uint64_offset = i * 2;
+
+                var acc_vec     = Sse2.LoadVector128(acc + uint64_offset);
+                var data_vec    = Sse2.LoadVector128((uint*) input + uint32_offset);
+                var key_vec     = Sse2.LoadVector128((uint*) secret + uint32_offset);
+                var data_key    = Sse2.Xor(data_vec, key_vec);
+                var data_key_lo = Sse2.Shuffle(data_key, _MM_SHUFFLE(0, 3, 0, 1));
+                var product     = Sse2.Multiply(data_key, data_key_lo);
+                var data_swap   = Sse2.Shuffle(data_vec, _MM_SHUFFLE(1, 0, 3, 2)).AsUInt64();
+                var sum         = Sse2.Add(acc_vec, data_swap);
+                var result      = Sse2.Add(product, sum); 
+                                  Sse2.Store(acc + uint64_offset, result);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -407,9 +433,34 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc(ulong* acc, byte* secret)
         {
-            // TODO: SIMD
+            if (Sse2.IsSupported)
+                XXH3_scrambleAcc_sse2(acc, secret);
+            else
+                XXH3_scrambleAcc_scalar(acc, secret);
+        }
 
-            XXH3_scrambleAcc_scalar(acc, secret);
+        private static unsafe void XXH3_scrambleAcc_sse2(ulong* acc, byte* secret)
+        {
+            const int m128i_size = 16;
+            
+            var prime32 = Vector128.Create(XXH_PRIME32_1);
+            
+            for (int i = 0; i < XXH_STRIPE_LEN / m128i_size; i++)
+            {
+                int uint32_offset = i * 4;
+                int uint64_offset = i * 2;
+
+                var acc_vec     = Sse2.LoadVector128(acc + uint64_offset).AsUInt32();
+                var shifted     = Sse2.ShiftRightLogical(acc_vec, 47);
+                var data_vec    = Sse2.Xor(acc_vec, shifted);
+                var key_vec     = Sse2.LoadVector128((uint*) secret + uint32_offset);
+                var data_key    = Sse2.Xor(data_vec, key_vec);
+                var data_key_hi = Sse2.Shuffle(data_key.AsUInt32(), _MM_SHUFFLE(0, 3, 0, 1));
+                var prod_lo     = Sse2.Multiply(data_key, prime32);
+                var prod_hi     = Sse2.Multiply(data_key_hi, prime32);
+                var result      = Sse2.Add(prod_lo, Sse2.ShiftLeftLogical(prod_hi, 32));
+                                  Sse2.Store(acc + uint64_offset, result);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -438,11 +489,33 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret(byte* customSecret, ulong seed)
         {
-            // TODO: SIMD
-            
-            XXH3_initCustomSecret_scalar(customSecret, seed);
+            if (Sse2.IsSupported)
+                XXH3_initCustomSecret_sse2(customSecret, seed);
+            else
+                XXH3_initCustomSecret_scalar(customSecret, seed);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe void XXH3_initCustomSecret_sse2(byte* customSecret, ulong seed64)
+        {
+            const int m128i_size = 16;
+
+            var seed = Vector128.Create((long) seed64, (long) (0U - seed64));
+
+            fixed (byte* secret = &XXH3_SECRET[0])
+            {
+                for (int i = 0; i < XXH_SECRET_DEFAULT_SIZE / m128i_size; ++i) 
+                {
+                    int uint64_offset = i * 2;
+
+                    var src16 = Sse2.LoadVector128((long*) secret + uint64_offset);
+                    var dst16 = Sse2.Add(src16, seed);
+                                Sse2.Store((long*) customSecret, dst16);
+                                
+                } 
+            }
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret_scalar(byte* customSecret, ulong seed)
         {
