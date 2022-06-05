@@ -166,7 +166,7 @@ namespace Standart.Hash.xxHash
         {
             fixed (byte* secret = &XXH3_SECRET[0])
             {
-                return XXH3_128bits_internal(input, len, seed, secret, XXH3_SECRET_DEFAULT_SIZE);
+                return __XXH3_128bits_internal(input, len, seed, secret, XXH3_SECRET_DEFAULT_SIZE);
             }
         }
     }
