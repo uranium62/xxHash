@@ -109,5 +109,27 @@ public class xxHash128Test
         for (int i = 0; i < 16; i++)
             Assert.Equal(expected[i], hash[i]);
     }
-    
+
+    [Fact]
+    public void Compute_hash128_fuzzing()
+    {
+        var rand = new Random();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            // Arrange
+            var seed = (ulong)rand.Next();
+            var data = new byte[rand.Next(1024) + 1];
+            rand.NextBytes(data);
+
+            // Act
+            var hash1 = xxHash128.ComputeHash(data, data.Length, seed);
+            var hash2 = xxHashNative.ComputeXXH128(data, (ulong)data.Length, seed);
+
+            // Assert
+            Assert.Equal(hash1.high64, hash2.high64);
+            Assert.Equal(hash1.low64, hash2.low64);
+        }
+    }
+
 }
