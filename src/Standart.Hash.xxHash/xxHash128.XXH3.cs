@@ -379,10 +379,37 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_accumulate_512(ulong* acc, byte* input, byte* secret)
         {
-            if (Sse2.IsSupported)
+            if (Avx2.IsSupported)
+                XXH3_accumulate_512_avx2(acc, input, secret);
+            else if (Sse2.IsSupported)
                 XXH3_accumulate_512_sse2(acc, input, secret);
             else
                 XXH3_accumulate_512_scalar(acc, input, secret);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe void XXH3_accumulate_512_avx2(ulong* acc, byte* input, byte* secret)
+        {
+            const int m256i_size = 32;
+            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
+            const byte _MM_SHUFFLE_1_0_3_2 = 0b0100_1110;
+
+            for (int i = 0; i < XXH_STRIPE_LEN / m256i_size; i++)
+            {
+                int uint32_offset = i * 8;
+                int uint64_offset = i * 4;
+
+                var acc_vec     = Avx2.LoadVector256(acc + uint64_offset);
+                var data_vec    = Avx2.LoadVector256((uint*)input + uint32_offset);
+                var key_vec     = Avx2.LoadVector256((uint*)secret + uint32_offset);
+                var data_key    = Avx2.Xor(data_vec, key_vec);
+                var data_key_lo = Avx2.Shuffle(data_key, _MM_SHUFFLE_0_3_0_1);
+                var product     = Avx2.Multiply(data_key, data_key_lo);
+                var data_swap   = Avx2.Shuffle(data_vec, _MM_SHUFFLE_1_0_3_2).AsUInt64();
+                var sum         = Avx2.Add(acc_vec, data_swap);
+                var result      = Avx2.Add(product, sum);
+                                  Avx2.Store(acc + uint64_offset, result);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -435,10 +462,36 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc(ulong* acc, byte* secret)
         {
-            if (Sse2.IsSupported)
+            if (Avx2.IsSupported)
+                XXH3_scrambleAcc_avx2(acc, secret);
+            else if (Sse2.IsSupported)
                 XXH3_scrambleAcc_sse2(acc, secret);
             else
                 XXH3_scrambleAcc_scalar(acc, secret);
+        }
+
+        private static unsafe void XXH3_scrambleAcc_avx2(ulong* acc, byte* secret)
+        {
+            const int m256i_size = 32;
+            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
+
+            var prime32 = Vector256.Create(XXH_PRIME32_1);
+
+            for (int i = 0; i < XXH_STRIPE_LEN / m256i_size; i++)
+            {
+                int uint64_offset = i * 4;
+
+                var acc_vec     = Avx2.LoadVector256(acc + uint64_offset);
+                var shifted     = Avx2.ShiftRightLogical(acc_vec, 47);
+                var data_vec    = Avx2.Xor(acc_vec, shifted);
+                var key_vec     = Avx2.LoadVector256((ulong*) secret + uint64_offset);
+                var data_key    = Avx2.Xor(data_vec, key_vec).AsUInt32();
+                var data_key_hi = Avx2.Shuffle(data_key, _MM_SHUFFLE_0_3_0_1);
+                var prod_lo     = Avx2.Multiply(data_key, prime32);
+                var prod_hi     = Avx2.Multiply(data_key_hi, prime32);
+                var result      = Avx2.Add(prod_lo, Avx2.ShiftLeftLogical(prod_hi, 32));
+                                  Avx2.Store(acc + uint64_offset, result);
+            }
         }
 
         private static unsafe void XXH3_scrambleAcc_sse2(ulong* acc, byte* secret)
@@ -492,28 +545,51 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret(byte* customSecret, ulong seed)
         {
-            if (Sse2.IsSupported)
+            if (Avx2.IsSupported)
+                XXH3_initCustomSecret_avx2(customSecret, seed);
+            else if (Sse2.IsSupported)
                 XXH3_initCustomSecret_sse2(customSecret, seed);
             else
                 XXH3_initCustomSecret_scalar(customSecret, seed);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe void XXH3_initCustomSecret_avx2(byte* customSecret, ulong seed64)
+        {
+            const int m256i_size = 32;
+
+            var seed = Vector256.Create((ulong)seed64, (ulong)(0U - seed64), (ulong)seed64, (ulong)(0U - seed64));
+
+            fixed (byte* secret = &XXH3_SECRET[0])
+            {
+                for (int i = 0; i < XXH_SECRET_DEFAULT_SIZE / m256i_size; i++)
+                {
+                    int uint64_offset = i * 4;
+
+                    var src32 = Avx2.LoadVector256(((ulong*)secret) + uint64_offset);
+                    var dst32 = Avx2.Add(src32, seed);
+                                Avx2.Store((ulong*) customSecret + uint64_offset, dst32);
+                }
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret_sse2(byte* customSecret, ulong seed64)
         {
             const int m128i_size = 16;
 
-            var seed = Vector128.Create((long) seed64, (long) (0U - seed64));
+            var seed = Vector128.Create((long)seed64, (long)(0U - seed64));
 
             fixed (byte* secret = &XXH3_SECRET[0])
             {
-                for (int i = 0; i < XXH_SECRET_DEFAULT_SIZE / m128i_size; ++i) 
+                for (int i = 0; i < XXH_SECRET_DEFAULT_SIZE / m128i_size; i++) 
                 {
                     int uint64_offset = i * 2;
 
-                    var src16 = Sse2.LoadVector128((long*) secret + uint64_offset);
+                    var src16 = Sse2.LoadVector128(((long*) secret) + uint64_offset);
                     var dst16 = Sse2.Add(src16, seed);
-                                Sse2.Store((long*) customSecret, dst16);
+                                Sse2.Store((long*) customSecret + uint64_offset, dst16);
                                 
                 } 
             }
