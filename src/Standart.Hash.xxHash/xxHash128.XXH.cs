@@ -127,11 +127,5 @@ namespace Standart.Hash.xxHash
         {
             *(ulong*) dst = v64;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static byte _MM_SHUFFLE(byte p3, byte p2, byte p1, byte p0)
-        {
-            return (byte)((p3 << 6) | (p2 << 4) | (p1 << 2) | p0);
-        }
     }
 }
