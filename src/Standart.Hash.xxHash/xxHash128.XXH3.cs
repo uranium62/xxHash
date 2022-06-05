@@ -389,6 +389,8 @@ namespace Standart.Hash.xxHash
         private static unsafe void XXH3_accumulate_512_sse2(ulong* acc, byte* input, byte* secret)
         {
             const int m128i_size = 16;
+            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
+            const byte _MM_SHUFFLE_1_0_3_2 = 0b0100_1110;
 
             for (int i = 0; i < XXH_STRIPE_LEN / m128i_size; i++)
             {
@@ -399,9 +401,9 @@ namespace Standart.Hash.xxHash
                 var data_vec    = Sse2.LoadVector128((uint*) input + uint32_offset);
                 var key_vec     = Sse2.LoadVector128((uint*) secret + uint32_offset);
                 var data_key    = Sse2.Xor(data_vec, key_vec);
-                var data_key_lo = Sse2.Shuffle(data_key, _MM_SHUFFLE(0, 3, 0, 1));
+                var data_key_lo = Sse2.Shuffle(data_key, _MM_SHUFFLE_0_3_0_1);
                 var product     = Sse2.Multiply(data_key, data_key_lo);
-                var data_swap   = Sse2.Shuffle(data_vec, _MM_SHUFFLE(1, 0, 3, 2)).AsUInt64();
+                var data_swap   = Sse2.Shuffle(data_vec, _MM_SHUFFLE_1_0_3_2).AsUInt64();
                 var sum         = Sse2.Add(acc_vec, data_swap);
                 var result      = Sse2.Add(product, sum); 
                                   Sse2.Store(acc + uint64_offset, result);
@@ -442,7 +444,8 @@ namespace Standart.Hash.xxHash
         private static unsafe void XXH3_scrambleAcc_sse2(ulong* acc, byte* secret)
         {
             const int m128i_size = 16;
-            
+            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
+
             var prime32 = Vector128.Create(XXH_PRIME32_1);
             
             for (int i = 0; i < XXH_STRIPE_LEN / m128i_size; i++)
@@ -455,7 +458,7 @@ namespace Standart.Hash.xxHash
                 var data_vec    = Sse2.Xor(acc_vec, shifted);
                 var key_vec     = Sse2.LoadVector128((uint*) secret + uint32_offset);
                 var data_key    = Sse2.Xor(data_vec, key_vec);
-                var data_key_hi = Sse2.Shuffle(data_key.AsUInt32(), _MM_SHUFFLE(0, 3, 0, 1));
+                var data_key_hi = Sse2.Shuffle(data_key.AsUInt32(), _MM_SHUFFLE_0_3_0_1);
                 var prod_lo     = Sse2.Multiply(data_key, prime32);
                 var prod_hi     = Sse2.Multiply(data_key_hi, prime32);
                 var result      = Sse2.Add(prod_lo, Sse2.ShiftLeftLogical(prod_hi, 32));
