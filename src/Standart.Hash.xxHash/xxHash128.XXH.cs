@@ -96,8 +96,8 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe uint128 XXH_mult64to128_bmi2(ulong lhs, ulong rhs)
         {
-            ulong product_high;
-            ulong product_low = Bmi2.X64.MultiplyNoFlags(lhs, rhs, &product_high);
+            ulong product_low;
+            ulong product_high = Bmi2.X64.MultiplyNoFlags(lhs, rhs, &product_low);
             uint128 r128;
             r128.low64  = product_low;
             r128.high64 = product_high;

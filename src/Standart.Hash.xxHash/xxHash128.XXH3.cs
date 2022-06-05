@@ -503,17 +503,17 @@ namespace Standart.Hash.xxHash
         {
             const int m128i_size = 16;
 
-            var seed = Vector128.Create((long) seed64, (long) (0U - seed64));
+            var seed = Vector128.Create((long)seed64, (long)(0U - seed64));
 
             fixed (byte* secret = &XXH3_SECRET[0])
             {
-                for (int i = 0; i < XXH_SECRET_DEFAULT_SIZE / m128i_size; ++i) 
+                for (int i = 0; i < XXH_SECRET_DEFAULT_SIZE / m128i_size; i++) 
                 {
                     int uint64_offset = i * 2;
 
-                    var src16 = Sse2.LoadVector128((long*) secret + uint64_offset);
+                    var src16 = Sse2.LoadVector128(((long*) secret) + uint64_offset);
                     var dst16 = Sse2.Add(src16, seed);
-                                Sse2.Store((long*) customSecret, dst16);
+                                Sse2.Store((long*) customSecret + uint64_offset, dst16);
                                 
                 } 
             }
