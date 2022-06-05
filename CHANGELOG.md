@@ -1,3 +1,6 @@
+# 2022-06-05
+- Added SIMD support for xxHash128
+- Inlined all method calls for xxHash128
 # 2022-06-03
 - Added xxHash128
 - Migrated to net6

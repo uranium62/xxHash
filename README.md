@@ -33,25 +33,37 @@ PM> Install-Package Standart.Hash.xxHash
 ```
 
 ## Benchmarks
-This benchmark was launched on a **Windows 10 (10.0.16299.309)**. The reference system uses a **Intel Core i7-4700MQ CPU 2.40GHz (Haswell)**
+This benchmark was launched on a **Windows 10.0.19044.1706 (21H2)**. The reference system uses a **AMD Ryzen 7 2700, 1 CPU, 16 logical and 8 physical cores**
+```
+BenchmarkDotNet=v0.13.1, OS=Windows 10.0.19044.1706 (21H2)
+AMD Ryzen 7 2700, 1 CPU, 16 logical and 8 physical cores
+.NET SDK=6.0.300
+  [Host]     : .NET 6.0.5 (6.0.522.21309), X64 RyuJIT
+  Job-HQVLOG : .NET 6.0.5 (6.0.522.21309), X64 RyuJIT
+Runtime=.NET 6.0  
+```
 
-| Method        |       x64 |
-|---------------|----------:|
-| Hash32 Array  | 5.05 GB/s |
-| Hash64 Array  | 8.92 GB/s |
-| Hash32 Span   | 5.05 GB/s |
-| Hash64 Span   | 8.92 GB/s |
-| Hash32 Stream | 3.22 GB/s |
-| Hash64 Stream | 4.81 GB/s |
+| Method         |       x64  |
+|----------------|----------=:|
+| Hash32 Array   | 5.87 GB/s  |
+| Hash64 Array   | 9.07 GB/s  |
+| Hash128 Array  | 12.04 GB/s |
+| Hash32 Span    | 5.87 GB/s  |
+| Hash64 Span    | 9.07 GB/s  |
+| Hash128 Span   | 12.04 GB/s |
+| Hash32 Stream  | 3.22 GB/s  |
+| Hash64 Stream  | 4.81 GB/s  |
 
 ## Comparison between С# and C implementation
 
-| Method | Platform | Language |  1KB Time |  1MB Time |  1GB Time |     Speed | Difference |
-|--------|---------:|---------:|----------:|----------:|----------:|----------:|-----------:| 
-| Hash32 |      x64 |       C# |  185.1 ns |  170.6 us |  193.6 ms | 5.16 GB/s |      1.4 % |
-| Hash32 |      x64 |       C  |  183.5 ns |  170.1 us |  190.8 ms | 5.24 GB/s |      1.4 % |
-| Hash64 |      x64 |       C# |  117.3 ns |   87.1 us |  116.9 ms | 8.55 GB/s |      2.4 % |
-| Hash64 |      x64 |       C  |  104.8 ns |   85.3 us |  114.1 ms | 8.76 GB/s |      2.4 % |
+| Method             | Platform | Language |  1KB Time |  1MB Time |  1GB Time |     Speed  |
+|-------------------:|---------:|---------:|----------:|----------:|----------:|-----------:|
+| Hash32             |      x64 |       C# |  151.5 ns |  143.4 us |  170.3 ms | 5.87 GB/s  |
+| Hash32             |      x64 |       C  |  138.5 ns |  129.5 us |  152.4 ms | 6.56 GB/s  |
+| Hash64             |      x64 |       C# |  84.6 ns  |   77.9 us |  110.2 ms | 9.07 GB/s  |
+| Hash64             |      x64 |       C  |  74.2 ns  |   64.8 us |  83.0 ms  | 12.04 GB/s |
+| Hash128 (SSE2/AVX2)|      x64 |       C# |  151.6 ns |   64.5 us |  80.5 ms  | 12.04 GB/s |
+| Hash128 (SSE2/AVX2)|      x64 |       C  |  84.4 ns  |   38.3 us |  57.4 ms  | 17.42 GB/s |
 
 
 ## Api
