@@ -389,8 +389,8 @@ namespace Standart.Hash.xxHash
         private static unsafe void XXH3_accumulate_512_sse2(ulong* acc, byte* input, byte* secret)
         {
             const int m128i_size = 16;
-            const byte _MM_SHUFFLE_0_3_0_1 = 49;
-            const byte _MM_SHUFFLE_1_0_3_2 = 78;
+            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
+            const byte _MM_SHUFFLE_1_0_3_2 = 0b0100_1110;
 
             for (int i = 0; i < XXH_STRIPE_LEN / m128i_size; i++)
             {
@@ -444,7 +444,7 @@ namespace Standart.Hash.xxHash
         private static unsafe void XXH3_scrambleAcc_sse2(ulong* acc, byte* secret)
         {
             const int m128i_size = 16;
-            const byte _MM_SHUFFLE_0_3_0_1 = 49;
+            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
 
             var prime32 = Vector128.Create(XXH_PRIME32_1);
             
