@@ -470,6 +470,7 @@ namespace Standart.Hash.xxHash
                 XXH3_scrambleAcc_scalar(acc, secret);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc_avx2(ulong* acc, byte* secret)
         {
             const int m256i_size = 32;
@@ -494,6 +495,7 @@ namespace Standart.Hash.xxHash
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc_sse2(ulong* acc, byte* secret)
         {
             const int m128i_size = 16;
