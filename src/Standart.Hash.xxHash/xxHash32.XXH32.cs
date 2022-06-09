@@ -7,14 +7,14 @@ namespace Standart.Hash.xxHash
     public static partial class xxHash32
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe uint XXH32_internal(byte* input, int len, uint seed)
+        private static unsafe uint XXH32(byte* input, int len, uint seed)
         {
-            byte* end = input + len;
             uint h32;
 
             if (len >= 16)
             {
-                byte* limit = end - 16;
+                byte* end = input + len;
+                byte* limit = end - 15;
 
                 uint v1 = seed + XXH_PRIME32_1 + XXH_PRIME32_2;
                 uint v2 = seed + XXH_PRIME32_2;
@@ -23,31 +23,11 @@ namespace Standart.Hash.xxHash
 
                 do
                 {
-                    // XXH32_round
-                    v1 += *((uint*)input) * XXH_PRIME32_2;
-                    v1 = XXH_rotl32(v1, 13);
-                    v1 *= XXH_PRIME32_1;
-                    input += 4;
-
-                    // XXH32_round
-                    v2 += *((uint*)input) * XXH_PRIME32_2;
-                    v2 = XXH_rotl32(v2, 13);
-                    v2 *= XXH_PRIME32_1;
-                    input += 4;
-
-                    // XXH32_round
-                    v3 += *((uint*)input) * XXH_PRIME32_2;
-                    v3 = XXH_rotl32(v3, 13);
-                    v3 *= XXH_PRIME32_1;
-                    input += 4;
-
-                    // XXH32_round
-                    v4 += *((uint*)input) * XXH_PRIME32_2;
-                    v4 = XXH_rotl32(v4, 13); 
-                    v4 *= XXH_PRIME32_1;
-                    input += 4;
-
-                } while (input <= limit);
+                    v1 = XXH32_round(v1, *(uint*) input); input += 4;
+                    v2 = XXH32_round(v2, *(uint*) input); input += 4;
+                    v3 = XXH32_round(v3, *(uint*) input); input += 4;
+                    v4 = XXH32_round(v4, *(uint*) input); input += 4;
+                } while (input < limit);
 
                 h32 = XXH_rotl32(v1, 1) + 
                       XXH_rotl32(v2, 7) +
@@ -61,116 +41,50 @@ namespace Standart.Hash.xxHash
 
             h32 += (uint)len;
 
-            // XXH32_finalize
-            while (input <= end - 4)
-            {
-                h32 += *((uint*)input) * XXH_PRIME32_3;
-                h32 = XXH_rotl32(h32, 17) * XXH_PRIME32_4;
-                input += 4;
-            }
-
-            while (input < end)
-            {
-                h32 += *((byte*)input) * XXH_PRIME32_5;
-                h32 = XXH_rotl32(h32, 11) * XXH_PRIME32_1;
-                input += 1;
-            }
-
-            // XXH32_avalanche
-            h32 ^= h32 >> 15;
-            h32 *= XXH_PRIME32_2;
-            h32 ^= h32 >> 13;
-            h32 *= XXH_PRIME32_3;
-            h32 ^= h32 >> 16;
-
-            return h32;
+            return XXH32_finalize(h32, input, len);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe void __XXH32_stream_align(byte[] input, int len, ref uint v1, ref uint v2, ref uint v3, ref uint v4)
+        private static uint XXH32_round(uint acc, uint input)
         {
-            fixed (byte* pData = &input[0])
-            {
-                byte* ptr = pData;
-                byte* limit = ptr + len;
-
-                do
-                {
-                    // XXH32_round
-                    v1 += *((uint*)ptr) * XXH_PRIME32_2;
-                    v1 = XXH_rotl32(v1, 13);
-                    v1 *= XXH_PRIME32_1;
-                    ptr += 4;
-
-                    // XXH32_round
-                    v2 += *((uint*)ptr) * XXH_PRIME32_2;
-                    v2 = XXH_rotl32(v2, 13);
-                    v2 *= XXH_PRIME32_1;
-                    ptr += 4;
-
-                    // XXH32_round
-                    v3 += *((uint*)ptr) * XXH_PRIME32_2;
-                    v3 = XXH_rotl32(v3, 13);
-                    v3 *= XXH_PRIME32_1;
-                    ptr += 4;
-
-                    // XXH32_round
-                    v4 += *((uint*)ptr) * XXH_PRIME32_2;
-                    v4 = XXH_rotl32(v4, 13);
-                    v4 *= XXH_PRIME32_1;
-                    ptr += 4;
-
-                } while (ptr < limit);
-            }
+            acc += input * XXH_PRIME32_2;
+            acc = XXH_rotl32(acc, 13);
+            acc *= XXH_PRIME32_1;
+            return acc;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe uint __XXH32_stream_finalize(byte[] input, int len, ref uint v1, ref uint v2, ref uint v3, ref uint v4, long length, uint seed)
+        private static uint XXH32_avalanche(uint hash)
         {
-            fixed (byte* pData = &input[0])
+            hash ^= hash >> 15;
+            hash *= XXH_PRIME32_2;
+            hash ^= hash >> 13;
+            hash *= XXH_PRIME32_3;
+            hash ^= hash >> 16;
+            return hash;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe uint XXH32_finalize(uint hash, byte* ptr, int len)
+        {
+            len &= 15;
+            while (len >= 4)
             {
-                byte* ptr = pData;
-                byte* end = pData + len;
-                uint h32;
-
-                if (length >= 16)
-                {
-                    h32 = XXH_rotl32(v1, 1) +  
-                          XXH_rotl32(v2, 7) +
-                          XXH_rotl32(v3, 12) +
-                          XXH_rotl32(v4, 18);
-                }
-                else
-                {
-                    h32 = seed + XXH_PRIME32_5;
-                }
-
-                h32 += (uint)length;
-
-                // XXH32_finalize
-                while (ptr <= end - 4)
-                {
-                    h32 += *((uint*)ptr) * XXH_PRIME32_3;
-                    h32 = XXH_rotl32(h32, 17) * XXH_PRIME32_4;
-                    ptr += 4;
-                }
-
-                while (ptr < end)
-                {
-                    h32 += *((byte*)ptr) * XXH_PRIME32_5;
-                    h32 = XXH_rotl32(h32, 11) * XXH_PRIME32_1;
-                    ptr += 1;
-                }
-
-                // XXH32_avalanche
-                h32 ^= h32 >> 15;
-                h32 *= XXH_PRIME32_2;
-                h32 ^= h32 >> 13;
-                h32 *= XXH_PRIME32_3;
-                h32 ^= h32 >> 16;
-
-                return h32;
+                hash += *((uint*)ptr) * XXH_PRIME32_3;
+                ptr += 4;
+                hash = XXH_rotl32(hash, 17) * XXH_PRIME32_4;
+                len -= 4;
             }
+
+            while (len > 0)
+            {
+                hash += *((byte*)ptr) * XXH_PRIME32_5;
+                ptr++;
+                hash = XXH_rotl32(hash, 11) * XXH_PRIME32_1;
+                len--;
+            }
+            
+            return XXH32_avalanche(hash);
         }
     }
 }
