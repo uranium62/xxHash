@@ -5,11 +5,13 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>../Standart.Hash.xxHash.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="$(AssemblyName).Test" />
-    <InternalsVisibleTo Include="$(AssemblyName).Perf" />
+    <InternalsVisibleTo Include="$(AssemblyName).Test, PublicKey=002400000480000094000000060200000024000052534131000400000100010065da5deb8cb94bd406567cd5202340cbdaf0669ceb0be100345cfe87d5e0e9390f4fd638b8b27bee0259e67d2c904df62acbe1aa333bc2906f5ab507e4891a29f097173714e592f7ac2f723d49f93516ca6e407bef8e1e921f2fb85d18e1456a279966967d7aa432e6ab784343dbd1a12a7b16de4669b434f2874c4cb0eba3be" />
+    <InternalsVisibleTo Include="$(AssemblyName).Perf, PublicKey=002400000480000094000000060200000024000052534131000400000100010065da5deb8cb94bd406567cd5202340cbdaf0669ceb0be100345cfe87d5e0e9390f4fd638b8b27bee0259e67d2c904df62acbe1aa333bc2906f5ab507e4891a29f097173714e592f7ac2f723d49f93516ca6e407bef8e1e921f2fb85d18e1456a279966967d7aa432e6ab784343dbd1a12a7b16de4669b434f2874c4cb0eba3be" />
   </ItemGroup>
   
 </Project>
