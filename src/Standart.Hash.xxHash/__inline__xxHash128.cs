@@ -13,7 +13,7 @@ namespace Standart.Hash.xxHash;
 public static partial class xxHash128
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe uint128 __XXH3_128bits_internal(byte* input, int len, ulong seed, byte* secret, int secretLen)
+    private static unsafe uint128 __inline__XXH3_128bits_internal(byte* input, int len, ulong seed, byte* secret, int secretLen)
     {
         if (len <= 16)
         {

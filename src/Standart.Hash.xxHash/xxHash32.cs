@@ -86,8 +86,7 @@ public static partial class xxHash32
     /// <param name="seed">The seed number</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The hash</returns>
-    public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize, uint seed,
-        CancellationToken cancellationToken)
+    public static async ValueTask<uint> ComputeHashAsync(Stream stream, int bufferSize, uint seed, CancellationToken cancellationToken)
     {
         Debug.Assert(stream != null);
         Debug.Assert(bufferSize > 16);
@@ -120,7 +119,7 @@ public static partial class xxHash32
                 int l = offset - r; // length
 
                 // Process the next chunk 
-                __XXH32_stream_align(buffer, l, ref v1, ref v2, ref v3, ref v4);
+                __inline__XXH32_stream_process(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                 // Put remaining bytes to buffer
                 Utils.BlockCopy(buffer, l, buffer, 0, r);
@@ -128,7 +127,7 @@ public static partial class xxHash32
             }
 
             // Process the final chunk
-            uint h32 = __XXH32_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
+            uint h32 = __inline__XXH32_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
 
             return h32;
         }
@@ -216,7 +215,7 @@ public static partial class xxHash32
                 int l = offset - r; // length
 
                 // Process the next chunk 
-                __XXH32_stream_align(buffer, l, ref v1, ref v2, ref v3, ref v4);
+                __inline__XXH32_stream_process(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                 // Put remaining bytes to buffer
                 Utils.BlockCopy(buffer, l, buffer, 0, r);
@@ -224,7 +223,7 @@ public static partial class xxHash32
             }
 
             // Process the last chunk
-            uint h32 = __XXH32_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
+            uint h32 = __inline__XXH32_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
 
             return h32;
         }
@@ -257,6 +256,9 @@ public static partial class xxHash32
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static unsafe uint UnsafeComputeHash(byte* ptr, int length, uint seed)
     {
-        return XXH32_internal(ptr, length, seed);
+        // Use inlined version
+        // return XXH32(ptr, length, seed);
+        
+        return __inline__XXH32(ptr, length, seed);
     }
 }
