@@ -28,28 +28,26 @@ public partial class xxHash32
             do
             {
                 // XXH32_round
-                v1 += *((uint*) input) * XXH_PRIME32_2;
+                v1 += *((uint*) (input+0)) * XXH_PRIME32_2;
                 v1 = (v1 << 13) | (v1 >> (32 - 13));
                 v1 *= XXH_PRIME32_1;
-                input += 4;
 
                 // XXH32_round
-                v2 += *((uint*) input) * XXH_PRIME32_2;
+                v2 += *((uint*) (input+4)) * XXH_PRIME32_2;
                 v2 = (v2 << 13) | (v2 >> (32 - 13));
                 v2 *= XXH_PRIME32_1;
-                input += 4;
 
                 // XXH32_round
-                v3 += *((uint*) input) * XXH_PRIME32_2;
+                v3 += *((uint*) (input+8)) * XXH_PRIME32_2;
                 v3 = (v3 << 13) | (v3 >> (32 - 13));
                 v3 *= XXH_PRIME32_1;
-                input += 4;
 
                 // XXH32_round
-                v4 += *((uint*) input) * XXH_PRIME32_2;
+                v4 += *((uint*) (input+12)) * XXH_PRIME32_2;
                 v4 = (v4 << 13) | (v4 >> (32 - 13));
                 v4 *= XXH_PRIME32_1;
-                input += 4;
+
+                input += 16;
             } while (input < limit);
 
             h32 = ((v1 << 1) | (v1 >> (32 - 1))) +
@@ -103,28 +101,26 @@ public partial class xxHash32
             do
             {
                 // XXH32_round
-                v1 += *((uint*)ptr) * XXH_PRIME32_2;
+                v1 += *((uint*)(ptr + 0)) * XXH_PRIME32_2;
                 v1 = (v1 << 13) | (v1 >> (32 - 13));
                 v1 *= XXH_PRIME32_1;
-                ptr += 4;
 
                 // XXH32_round
-                v2 += *((uint*)ptr) * XXH_PRIME32_2;
+                v2 += *((uint*)(ptr + 4)) * XXH_PRIME32_2;
                 v2 = (v2 << 13) | (v2 >> (32 - 13));
                 v2 *= XXH_PRIME32_1;
-                ptr += 4;
 
                 // XXH32_round
-                v3 += *((uint*)ptr) * XXH_PRIME32_2;
+                v3 += *((uint*)(ptr + 8)) * XXH_PRIME32_2;
                 v3 = (v3 << 13) | (v3 >> (32 - 13));
                 v3 *= XXH_PRIME32_1;
-                ptr += 4;
 
                 // XXH32_round
-                v4 += *((uint*)ptr) * XXH_PRIME32_2;
+                v4 += *((uint*)(ptr + 12)) * XXH_PRIME32_2;
                 v4 = (v4 << 13) | (v4 >> (32 - 13));
                 v4 *= XXH_PRIME32_1;
-                ptr += 4;
+
+                ptr += 16;
 
             } while (ptr < limit);
         }
