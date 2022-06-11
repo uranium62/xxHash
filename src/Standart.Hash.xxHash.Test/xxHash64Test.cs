@@ -399,5 +399,26 @@ namespace Standart.Hash.xxHash.Test
             // Assert
             Assert.Equal(hash1, hash2);
         }
+
+        [Fact]
+        public void Compute_hash64_fuzzing()
+        {
+            var rand = new Random();
+
+            for (int i = 0; i < 100000; i++)
+            {
+                // Arrange
+                var seed = (uint)rand.Next();
+                var data = new byte[rand.Next(1024) + 1];
+                rand.NextBytes(data);
+
+                // Act
+                var hash1 = xxHash64.ComputeHash(data, data.Length, seed);
+                var hash2 = xxHashNative.ComputeXXH64(data, (ulong)data.Length, seed);
+
+                // Assert
+                Assert.Equal(hash1, hash2);
+            }
+        }
     }
 }
