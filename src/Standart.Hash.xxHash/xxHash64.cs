@@ -119,7 +119,7 @@ public static partial class xxHash64
                 int l = offset - r; // length
 
                 // Process the next chunk 
-                __XXH64_stream_align(buffer, l, ref v1, ref v2, ref v3, ref v4);
+                __inline__XXH64_stream_process(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                 // Put remaining bytes to buffer
                 Utils.BlockCopy(buffer, l, buffer, 0, r);
@@ -127,7 +127,7 @@ public static partial class xxHash64
             }
 
             // Process the final chunk
-            ulong h64 = __XXH64_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
+            ulong h64 = __inline__XXH64_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
 
             return h64;
         }
@@ -215,7 +215,7 @@ public static partial class xxHash64
                 int l = offset - r; // length
 
                 // Process the next chunk 
-                __XXH64_stream_align(buffer, l, ref v1, ref v2, ref v3, ref v4);
+                __inline__XXH64_stream_process(buffer, l, ref v1, ref v2, ref v3, ref v4);
 
                 // Put remaining bytes to buffer
                 Utils.BlockCopy(buffer, l, buffer, 0, r);
@@ -223,7 +223,7 @@ public static partial class xxHash64
             }
 
             // Process the final chunk
-            ulong h64 = __XXH64_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
+            ulong h64 = __inline__XXH64_stream_finalize(buffer, offset, ref v1, ref v2, ref v3, ref v4, length, seed);
 
             return h64;
         }
@@ -256,6 +256,9 @@ public static partial class xxHash64
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static unsafe ulong UnsafeComputeHash(byte* ptr, int length, ulong seed)
     {
-        return XXH64_internal(ptr, length, seed);
+        // Use inlined version
+        // return XXH64(ptr, length, seed);
+        
+        return __inline__XXH64(ptr, length, seed);
     }
 }

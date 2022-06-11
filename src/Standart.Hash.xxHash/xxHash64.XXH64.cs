@@ -7,15 +7,14 @@ namespace Standart.Hash.xxHash
     public static partial class xxHash64
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe ulong XXH64_internal(byte* input, int len, ulong seed)
+        private static unsafe ulong XXH64(byte* input, int len, ulong seed)
         {
-            byte* end = input + len;
             ulong h64;
 
             if (len >= 32)
-
             {
-                byte* limit = end - 32;
+                byte* end = input + len;
+                byte* limit = end - 31;
 
                 ulong v1 = seed + XXH_PRIME64_1 + XXH_PRIME64_2;
                 ulong v2 = seed + XXH_PRIME64_2;
@@ -24,64 +23,21 @@ namespace Standart.Hash.xxHash
 
                 do
                 {
-                    // XXH64_round
-                    v1 += *((ulong*)input) * XXH_PRIME64_2;
-                    v1 = XXH_rotl64(v1, 31);
-                    v1 *= XXH_PRIME64_1;
-                    input += 8;
-
-                    // XXH64_round
-                    v2 += *((ulong*)input) * XXH_PRIME64_2;
-                    v2 = XXH_rotl64(v2, 31);
-                    v2 *= XXH_PRIME64_1;
-                    input += 8;
-
-                    // XXH64_round
-                    v3 += *((ulong*)input) * XXH_PRIME64_2;
-                    v3 = XXH_rotl64(v3, 31);
-                    v3 *= XXH_PRIME64_1;
-                    input += 8;
-
-                    // XXH64_round
-                    v4 += *((ulong*)input) * XXH_PRIME64_2;
-                    v4 = XXH_rotl64(v4, 31);
-                    v4 *= XXH_PRIME64_1;
-                    input += 8;
-
-                } while (input <= limit);
+                    v1 = XXH64_round(v1, *(ulong*) input); input += 8;
+                    v2 = XXH64_round(v2, *(ulong*) input); input += 8;
+                    v3 = XXH64_round(v3, *(ulong*) input); input += 8;
+                    v4 = XXH64_round(v4, *(ulong*) input); input += 8;
+                } while (input < limit);
 
                 h64 = XXH_rotl64(v1, 1) +
                       XXH_rotl64(v2, 7) +
                       XXH_rotl64(v3, 12) +
                       XXH_rotl64(v4, 18);  
-
-                // XXH64_mergeRound
-                v1 *= XXH_PRIME64_2;
-                v1 = XXH_rotl64(v1, 31);
-                v1 *= XXH_PRIME64_1;
-                h64 ^= v1;
-                h64 = h64 * XXH_PRIME64_1 + XXH_PRIME64_4;
-
-                // XXH64_mergeRound
-                v2 *= XXH_PRIME64_2;
-                v2 = XXH_rotl64(v2, 31);
-                v2 *= XXH_PRIME64_1;
-                h64 ^= v2;
-                h64 = h64 * XXH_PRIME64_1 + XXH_PRIME64_4;
-
-                // XXH64_mergeRound
-                v3 *= XXH_PRIME64_2;
-                v3 = XXH_rotl64(v3, 31);
-                v3 *= XXH_PRIME64_1;
-                h64 ^= v3;
-                h64 = h64 * XXH_PRIME64_1 + XXH_PRIME64_4;
-
-                // XXH64_mergeRound
-                v4 *= XXH_PRIME64_2;
-                v4 = XXH_rotl64(v4, 31);
-                v4 *= XXH_PRIME64_1;
-                h64 ^= v4;
-                h64 = h64 * XXH_PRIME64_1 + XXH_PRIME64_4;
+                
+                h64 = XXH64_mergeRound(h64, v1);
+                h64 = XXH64_mergeRound(h64, v2);
+                h64 = XXH64_mergeRound(h64, v3);
+                h64 = XXH64_mergeRound(h64, v4);
             }
             else
             {
@@ -89,165 +45,62 @@ namespace Standart.Hash.xxHash
             }
 
             h64 += (ulong)len;
-
-            // XXH64_finalize
-            while (input <= end - 8)
-            {
-                ulong t1 = *((ulong*)input) * XXH_PRIME64_2;
-                t1 = XXH_rotl64(t1, 31); 
-                t1 *= XXH_PRIME64_1;
-                h64 ^= t1;
-                h64 = XXH_rotl64(h64, 27) * XXH_PRIME64_1 + XXH_PRIME64_4;
-                input += 8;
-            }
-
-            if (input <= end - 4)
-            {
-                h64 ^= *((uint*)input) * XXH_PRIME64_1;
-                h64 = XXH_rotl64(h64, 23) * XXH_PRIME64_2 + XXH_PRIME64_3;
-                input += 4;
-            }
-
-            while (input < end)
-            {
-                h64 ^= *((byte*)input) * XXH_PRIME64_5;
-                h64 = XXH_rotl64(h64, 11) * XXH_PRIME64_1;
-                input += 1;
-            }
-
-            // XXH64_avalanche
-            h64 ^= h64 >> 33;
-            h64 *= XXH_PRIME64_2;
-            h64 ^= h64 >> 29;
-            h64 *= XXH_PRIME64_3;
-            h64 ^= h64 >> 32;
-
-            return h64;
+            
+            return XXH64_finalize(h64, input, len);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe void __XXH64_stream_align(byte[] input, int len, ref ulong v1, ref ulong v2, ref ulong v3, ref ulong v4)
+        private static ulong XXH64_round(ulong acc, ulong input)
         {
-            fixed (byte* pData = &input[0])
-            {
-                byte* ptr = pData;
-                byte* limit = ptr + len;
-
-                do
-                {
-                    // XXH64_round
-                    v1 += *((ulong*)ptr) * XXH_PRIME64_2;
-                    v1 = XXH_rotl64(v1, 31);
-                    v1 *= XXH_PRIME64_1;
-                    ptr += 8;
-
-                    // XXH64_round
-                    v2 += *((ulong*)ptr) * XXH_PRIME64_2;
-                    v2 = XXH_rotl64(v2, 31);
-                    v2 *= XXH_PRIME64_1;
-                    ptr += 8;
-
-                    // XXH64_round
-                    v3 += *((ulong*)ptr) * XXH_PRIME64_2;
-                    v3 = XXH_rotl64(v3, 31);
-                    v3 *= XXH_PRIME64_1;
-                    ptr += 8;
-
-                    // XXH64_round
-                    v4 += *((ulong*)ptr) * XXH_PRIME64_2;
-                    v4 = XXH_rotl64(v4, 31);
-                    v4 *= XXH_PRIME64_1;
-                    ptr += 8;
-
-                } while (ptr < limit);
-            }
+            acc += input * XXH_PRIME64_2;
+            acc  = XXH_rotl64(acc, 31);
+            acc *= XXH_PRIME64_1;
+            return acc;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe ulong __XXH64_stream_finalize(byte[] input, int len, ref ulong v1, ref ulong v2, ref ulong v3, ref ulong v4, long length, ulong seed)
+        private static ulong XXH64_mergeRound(ulong acc, ulong val)
         {
-            fixed (byte* pData = &input[0])
-            {
-                byte* ptr = pData;
-                byte* end = pData + len;
-                ulong h64;
+            val  = XXH64_round(0, val);
+            acc ^= val;
+            acc  = acc * XXH_PRIME64_1 + XXH_PRIME64_4;
+            return acc;
+        }
 
-                if (length >= 32)
-                {
-                    h64 = XXH_rotl64(v1, 1) +
-                          XXH_rotl64(v2, 7) +
-                          XXH_rotl64(v3, 12) +
-                          XXH_rotl64(v4, 18);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong XXH64_avalanche(ulong hash)
+        {
+            hash ^= hash >> 33;
+            hash *= XXH_PRIME64_2;
+            hash ^= hash >> 29;
+            hash *= XXH_PRIME64_3;
+            hash ^= hash >> 32;
+            return hash;
+        }
 
-                    // XXH64_mergeRound
-                    v1 *= XXH_PRIME64_2;
-                    v1 = XXH_rotl64(v1, 31);
-                    v1 *= XXH_PRIME64_1;
-                    h64 ^= v1;
-                    h64 = h64 * XXH_PRIME64_1 + XXH_PRIME64_4;
-
-                    // XXH64_mergeRound
-                    v2 *= XXH_PRIME64_2;
-                    v2 = XXH_rotl64(v2, 31);
-                    v2 *= XXH_PRIME64_1;
-                    h64 ^= v2;
-                    h64 = h64 * XXH_PRIME64_1 + XXH_PRIME64_4;
-
-                    // XXH64_mergeRound
-                    v3 *= XXH_PRIME64_2;
-                    v3 = XXH_rotl64(v3, 31);
-                    v3 *= XXH_PRIME64_1;
-                    h64 ^= v3;
-                    h64 = h64 * XXH_PRIME64_1 + XXH_PRIME64_4;
-
-                    // XXH64_mergeRound
-                    v4 *= XXH_PRIME64_2;
-                    v4 = XXH_rotl64(v4, 31);
-                    v4 *= XXH_PRIME64_1;
-                    h64 ^= v4;
-                    h64 = h64 * XXH_PRIME64_1 + XXH_PRIME64_4;
-                }
-                else
-                {
-                    h64 = seed + XXH_PRIME64_5;
-                }
-
-                h64 += (ulong)length;
-
-                // XXH64_finalize
-                while (ptr <= end - 8)
-                {
-                    ulong t1 = *((ulong*)ptr) * XXH_PRIME64_2;
-                    t1 = XXH_rotl64(t1, 31);
-                    t1 *= XXH_PRIME64_1;
-                    h64 ^= t1;
-                    h64 = XXH_rotl64(h64, 27) * XXH_PRIME64_1 + XXH_PRIME64_4;
-                    ptr += 8;
-                }
-
-                if (ptr <= end - 4)
-                {
-                    h64 ^= *((uint*)ptr) * XXH_PRIME64_1;
-                    h64 = XXH_rotl64(h64, 23) * XXH_PRIME64_2 + XXH_PRIME64_3;
-                    ptr += 4;
-                }
-
-                while (ptr < end)
-                {
-                    h64 ^= *((byte*)ptr) * XXH_PRIME64_5;
-                    h64 = XXH_rotl64(h64, 11) * XXH_PRIME64_1;
-                    ptr += 1;
-                }
-
-                // XXH64_avalanche
-                h64 ^= h64 >> 33;
-                h64 *= XXH_PRIME64_2;
-                h64 ^= h64 >> 29;
-                h64 *= XXH_PRIME64_3;
-                h64 ^= h64 >> 32;
-
-                return h64;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe ulong XXH64_finalize(ulong hash, byte* ptr, int len)
+        {
+            len &= 31;
+            while (len >= 8) {
+                ulong k1 = XXH64_round(0, *(ulong*)ptr);
+                ptr += 8;
+                hash ^= k1;
+                hash  = XXH_rotl64(hash,27) * XXH_PRIME64_1 + XXH_PRIME64_4;
+                len -= 8;
             }
+            if (len >= 4) {
+                hash ^= *(uint*)ptr * XXH_PRIME64_1;
+                ptr += 4;
+                hash = XXH_rotl64(hash, 23) * XXH_PRIME64_2 + XXH_PRIME64_3;
+                len -= 4;
+            }
+            while (len > 0) {
+                hash ^= (*ptr++) * XXH_PRIME64_5;
+                hash = XXH_rotl64(hash, 11) * XXH_PRIME64_1;
+                --len;
+            }
+            return  XXH64_avalanche(hash);
         }
     }
 }
