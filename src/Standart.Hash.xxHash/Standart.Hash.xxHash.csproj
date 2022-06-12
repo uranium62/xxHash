@@ -5,11 +5,9 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageId>Standart.Hash.xxHash.Signed</PackageId>
+    <AssemblyName>Standart.Hash.xxHash.Signed</AssemblyName>
+    <AssemblyOriginatorKeyFile>..\..\sgKey.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>True</SignAssembly>
   </PropertyGroup>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="$(AssemblyName).Test" />
-    <InternalsVisibleTo Include="$(AssemblyName).Perf" />
-  </ItemGroup>
-  
 </Project>
