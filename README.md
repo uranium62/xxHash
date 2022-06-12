@@ -8,15 +8,6 @@
 </p>
 <br>
 <p align="center">
-  <a href="https://ci.appveyor.com/project/uranium62/xxhash">
-    <img src="https://ci.appveyor.com/api/projects/status/j5gkm2rvxwu4gu3q?svg=true" alt="build" />
-  </a>
-  <a href="https://codecov.io/gh/uranium62/xxHash">
-    <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
-  </a>
-  <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
-    <img src="https://img.shields.io/badge/nuget-1.0.6-green.svg?style=flat-square" alt="nuget"/>
-  </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
     <img src="https://img.shields.io/badge/platform-x64-blue.svg?longCache=true" alt="platform"/>
   </a>
