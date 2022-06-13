@@ -3,3 +3,4 @@ EXPORTS
 	XXH32 @1
 	XXH64 @2
 	XXH3_128bits_withSeed @3
+	XXH3_64bits_withSeed @4

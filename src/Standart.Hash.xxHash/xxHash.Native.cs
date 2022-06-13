@@ -15,8 +15,11 @@
 
         [DllImport("xxHash.dll")]
         [SuppressUnmanagedCodeSecurity]
-        static extern unsafe XXH128_hash_t XXH3_128bits_withSeed(byte* input, ulong len, ulong seed);
+        static extern unsafe ulong XXH3_64bits_withSeed(byte* input, ulong len, ulong seed);
 
+        [DllImport("xxHash.dll")]
+        [SuppressUnmanagedCodeSecurity]
+        static extern unsafe XXH128_hash_t XXH3_128bits_withSeed(byte* input, ulong len, ulong seed);
 
         public static unsafe uint ComputeXXH32(byte[] data, ulong length, uint seed = 0)
         {
@@ -31,6 +34,14 @@
             fixed (byte* pData = &data[0])
             {
                 return XXH64(pData, length, seed);
+            }
+        }
+
+        public static unsafe ulong ComputeXXH3(byte[] data, ulong length, ulong seed = 0)
+        {
+            fixed (byte* pData = &data[0])
+            {
+                return XXH3_64bits_withSeed(pData, length, seed);
             }
         }
 

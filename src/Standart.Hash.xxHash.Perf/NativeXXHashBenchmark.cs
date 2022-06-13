@@ -62,5 +62,17 @@ namespace Standart.Hash.xxHash.Perf
             return xxHashNative.ComputeXXH128(data, (ulong)data.Length);
         }
 
+        [Benchmark]
+        public ulong Hash3_Array()
+        {
+            return xxHash3.ComputeHash(data, data.Length);
+        }
+
+        [Benchmark]
+        public ulong Hash3_Native()
+        {
+            return xxHashNative.ComputeXXH3(data, (ulong)data.Length);
+        }
+
     }
 }
