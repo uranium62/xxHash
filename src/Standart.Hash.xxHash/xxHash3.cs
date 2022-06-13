@@ -64,21 +64,21 @@ namespace Standart.Hash.xxHash
                 return UnsafeComputeHash(ptr, length, seed);
             }
         }
-        
+
         /// <summary>
         /// Compute xxHash for the string 
         /// </summary>
-        /// <param name="str">The source of data</param>
+        /// <param name="unicode">The source of data</param>
         /// <param name="seed">The seed number</param>
         /// <returns>hash</returns>
-        public static unsafe ulong ComputeHash(string str, ulong seed = 0)
+        public static unsafe ulong ComputeHash(string unicode, ulong seed = 0)
         {
-            Debug.Assert(str != null);
+            Debug.Assert(unicode != null);
             
-            fixed (char* c = str)
+            fixed (char* c = unicode)
             {
                 byte* ptr = (byte*) c;
-                int length = str.Length * 2;
+                int length = unicode.Length * 2;
                 
                 return UnsafeComputeHash(ptr, length, seed);
             }
@@ -90,7 +90,9 @@ namespace Standart.Hash.xxHash
             fixed (byte* secret = &XXH3_SECRET[0])
             {
                 // Use inlined version
-                return XXH3_64bits_internal(input, len, seed, secret, XXH3_SECRET_DEFAULT_SIZE);
+                // return XXH3_64bits_internal(input, len, seed, secret, XXH3_SECRET_DEFAULT_SIZE);
+                
+                return __inline__XXH3_64bits_internal(input, len, seed, secret, XXH3_SECRET_DEFAULT_SIZE);
             }
         }
     }
