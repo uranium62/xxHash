@@ -57,7 +57,7 @@ namespace Standart.Hash.xxHash
                 return XXH3_len_9to16_64b(input, len, secret, seed);
             if (len >= 4)
                 return XXH3_len_4to8_64b(input, len, secret, seed);
-            if (len > 0)
+            if (len != 0)
                 return XXH3_len_1to3_64b(input, len, secret, seed);
 
             return XXH64_avalanche(seed ^ (XXH_readLE64(secret + 56) ^ XXH_readLE64(secret + 64)));
@@ -70,7 +70,7 @@ namespace Standart.Hash.xxHash
             ulong bitflip2 = (XXH_readLE64(secret + 40) ^ XXH_readLE64(secret + 48)) - seed;
             ulong input_lo = XXH_readLE64(input) ^ bitflip1;
             ulong input_hi = XXH_readLE64(input + len - 8) ^ bitflip2;
-            ulong acc = (ulong) len
+            ulong acc = ((ulong) len)
                         + XXH_swap64(input_lo) + input_hi
                         + XXH3_mul128_fold64(input_lo, input_hi);
             return XXH3_avalanche(acc);
@@ -81,44 +81,6 @@ namespace Standart.Hash.xxHash
         {
             uint128 product = XXH_mult64to128(lhs, rhs);
             return product.low64 ^ product.high64;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint128 XXH_mult64to128(ulong lhs, ulong rhs)
-        {
-            if (Bmi2.IsSupported)
-                return XXH_mult64to128_bmi2(lhs, rhs);
-
-            return XXH_mult64to128_scalar(lhs, rhs);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe uint128 XXH_mult64to128_bmi2(ulong lhs, ulong rhs)
-        {
-            ulong product_low;
-            ulong product_high = Bmi2.X64.MultiplyNoFlags(lhs, rhs, &product_low);
-            uint128 r128;
-            r128.low64 = product_low;
-            r128.high64 = product_high;
-            return r128;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint128 XXH_mult64to128_scalar(ulong lhs, ulong rhs)
-        {
-            ulong lo_lo = XXH_mult32to64(lhs & 0xFFFFFFFF, rhs & 0xFFFFFFFF);
-            ulong hi_lo = XXH_mult32to64(lhs >> 32, rhs & 0xFFFFFFFF);
-            ulong lo_hi = XXH_mult32to64(lhs & 0xFFFFFFFF, rhs >> 32);
-            ulong hi_hi = XXH_mult32to64(lhs >> 32, rhs >> 32);
-
-            ulong cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFF) + lo_hi;
-            ulong upper = (hi_lo >> 32) + (cross >> 32) + hi_hi;
-            ulong lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
-
-            uint128 r128;
-            r128.low64 = lower;
-            r128.high64 = upper;
-            return r128;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -157,9 +119,9 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe ulong XXH3_len_1to3_64b(byte* input, int len, byte* secret, ulong seed)
         {
-            byte* c1 = &input[0];
-            byte* c2 = &input[len >> 1];
-            byte* c3 = &input[len - 1];
+            byte c1 = input[0];
+            byte c2 = input[len >> 1];
+            byte c3 = input[len - 1];
             uint combined = ((uint) c1 << 16) |
                             ((uint) c2 << 24) |
                             ((uint) c3 << 0) |
@@ -168,14 +130,14 @@ namespace Standart.Hash.xxHash
             ulong bitflip = (XXH_readLE32(secret) ^
                              XXH_readLE32(secret + 4)) + seed;
 
-            ulong keyed = combined ^ bitflip;
+            ulong keyed = (ulong)combined ^ bitflip;
             return XXH64_avalanche(keyed);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe ulong XXH3_len_17to128_64b(byte* input, int len, byte* secret, int secretSize, ulong seed)
         {
-            ulong acc = (ulong) len * XXH_PRIME64_1;
+            ulong acc = ((ulong)len) * XXH_PRIME64_1;
 
             if (len > 32)
             {
@@ -186,11 +148,9 @@ namespace Standart.Hash.xxHash
                         acc += XXH3_mix16B(input + 48, secret + 96, seed);
                         acc += XXH3_mix16B(input + len - 64, secret + 112, seed);
                     }
-
                     acc += XXH3_mix16B(input + 32, secret + 64, seed);
                     acc += XXH3_mix16B(input + len - 48, secret + 80, seed);
                 }
-
                 acc += XXH3_mix16B(input + 16, secret + 32, seed);
                 acc += XXH3_mix16B(input + len - 32, secret + 48, seed);
             }
@@ -201,14 +161,14 @@ namespace Standart.Hash.xxHash
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe ulong XXH3_mix16B(byte* input, byte* secret, ulong seed)
+        private static unsafe ulong XXH3_mix16B(byte* input, byte* secret, ulong seed64)
         {
             ulong input_lo = XXH_readLE64(input);
             ulong input_hi = XXH_readLE64(input + 8);
 
             return XXH3_mul128_fold64(
-                input_lo ^ (XXH_readLE64(secret) + seed),
-                input_hi ^ (XXH_readLE64(secret + 8) - seed)
+                input_lo ^ (XXH_readLE64(secret) + seed64),
+                input_hi ^ (XXH_readLE64(secret + 8) - seed64)
             );
         }
 
@@ -216,14 +176,13 @@ namespace Standart.Hash.xxHash
         private static unsafe ulong XXH3_len_129to240_64b(byte* input, int len, byte* secret, int secretSize,
             ulong seed)
         {
-            ulong acc = (ulong) len * XXH_PRIME64_1;
+            ulong acc = ((ulong) len) * XXH_PRIME64_1;
             int nbRounds = len / 16;
 
             for (int i = 0; i < 8; i++)
             {
                 acc += XXH3_mix16B(input + (16 * i), secret + (16 * i), seed);
             }
-
             acc = XXH3_avalanche(acc);
 
             for (int i = 8; i < nbRounds; i++)
@@ -242,11 +201,12 @@ namespace Standart.Hash.xxHash
             if (seed == 0)
                 return XXH3_hashLong_64b_internal(input, len, secret, secretSize);
 
-            byte* customSecret = stackalloc byte[XXH3_SECRET_DEFAULT_SIZE];
+            int customSecretSize = XXH3_SECRET_DEFAULT_SIZE;
+            byte* customSecret = stackalloc byte[customSecretSize];
 
             fixed (byte* ptr = &XXH3_SECRET[0])
             {
-                for (int i = 0; i < XXH3_SECRET_DEFAULT_SIZE; i += 8)
+                for (int i = 0; i < customSecretSize; i += 8)
                 {
                     customSecret[i] = ptr[i];
                     customSecret[i + 1] = ptr[i + 1];
@@ -261,7 +221,7 @@ namespace Standart.Hash.xxHash
 
             XXH3_initCustomSecret(customSecret, seed);
 
-            return XXH3_hashLong_64b_internal(input, len, customSecret, XXH3_SECRET_DEFAULT_SIZE);
+            return XXH3_hashLong_64b_internal(input, len, customSecret, customSecretSize);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -290,7 +250,7 @@ namespace Standart.Hash.xxHash
 
                     var src32 = Avx2.LoadVector256(((ulong*) secret) + uint64_offset);
                     var dst32 = Avx2.Add(src32, seed);
-                    Avx2.Store((ulong*) customSecret + uint64_offset, dst32);
+                                Avx2.Store((ulong*) customSecret + uint64_offset, dst32);
                 }
             }
         }
@@ -310,7 +270,7 @@ namespace Standart.Hash.xxHash
 
                     var src16 = Sse2.LoadVector128(((long*) secret) + uint64_offset);
                     var dst16 = Sse2.Add(src16, seed);
-                    Sse2.Store((long*) customSecret + uint64_offset, dst16);
+                                Sse2.Store((long*) customSecret + uint64_offset, dst16);
                 }
             }
         }
@@ -351,7 +311,7 @@ namespace Standart.Hash.xxHash
 
             XXH3_hashLong_internal_loop(acc, input, len, secret, secretSize);
 
-            return XXH3_mergeAccs(acc, secret + XXH_SECRET_MERGEACCS_START, (ulong) len * XXH_PRIME64_1);
+            return XXH3_mergeAccs(acc, secret + XXH_SECRET_MERGEACCS_START, ((ulong) len) * XXH_PRIME64_1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
