@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <PackageId>Standart.Hash.xxHash</PackageId>
-    <VersionPrefix>4.0.2</VersionPrefix>
+    <VersionPrefix>4.0.3</VersionPrefix>
     <AssemblyName>Standart.Hash.xxHash</AssemblyName>
     <AssemblyTitle>Standart.Hash.xxHash</AssemblyTitle>
     <Authors>Oleksandr Melnyk</Authors>
