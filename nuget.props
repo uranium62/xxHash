@@ -10,5 +10,6 @@
     <PackageTags>hash;xxHash</PackageTags>
     <Description>Standart.Hash.xxHash</Description>
     <PackageProjectUrl>https://github.com/uranium62/xxHash</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>
