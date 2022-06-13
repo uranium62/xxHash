@@ -8,15 +8,6 @@
 </p>
 <br>
 <p align="center">
-  <a href="https://ci.appveyor.com/project/uranium62/xxhash">
-    <img src="https://ci.appveyor.com/api/projects/status/j5gkm2rvxwu4gu3q?svg=true" alt="build" />
-  </a>
-  <a href="https://codecov.io/gh/uranium62/xxHash">
-    <img src="https://codecov.io/gh/uranium62/xxHash/branch/master/graph/badge.svg" alt="coverage"/>
-  </a>
-  <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
-    <img src="https://img.shields.io/badge/nuget-1.0.6-green.svg?style=flat-square" alt="nuget"/>
-  </a>
   <a href="https://www.nuget.org/packages/Standart.Hash.xxHash">
     <img src="https://img.shields.io/badge/platform-x64-blue.svg?longCache=true" alt="platform"/>
   </a>
@@ -44,13 +35,15 @@ Runtime=.NET 6.0
 ```
 
 | Method         |       x64  |
-|:---------------|----------:|
+|:---------------|-----------:|
 | Hash32 Array   | 5.87 GB/s  |
 | Hash64 Array   | 9.07 GB/s  |
 | Hash128 Array  | 12.04 GB/s |
+| Hash3 Array    | 12.08 GB/s |
 | Hash32 Span    | 5.87 GB/s  |
 | Hash64 Span    | 9.07 GB/s  |
 | Hash128 Span   | 12.04 GB/s |
+| Hash3 Span     | 12.08 GB/s |
 | Hash32 Stream  | 3.22 GB/s  |
 | Hash64 Stream  | 4.81 GB/s  |
 
@@ -64,6 +57,8 @@ Runtime=.NET 6.0
 | Hash64             |      x64 |       C  |  74.2 ns  |   64.8 us |  83.0 ms  | 12.04 GB/s |
 | Hash128 (SSE2/AVX2)|      x64 |       C# |  151.6 ns |   64.5 us |  80.5 ms  | 12.04 GB/s |
 | Hash128 (SSE2/AVX2)|      x64 |       C  |  84.4 ns  |   38.3 us |  57.4 ms  | 17.42 GB/s |
+| Hash3   (SSE2/AVX2)|      x64 |       C# |  77.6 ns  |   62.1 us |  78.5 ms  | 12.08 GB/s |
+| Hash3   (SSE2/AVX2)|      x64 |       C  |  73.7 ns  |   42.2 us |  59.8 ms  | 16.72 GB/s |
 
 
 ## Api
@@ -110,6 +105,11 @@ uint h32_3 = xxHash32.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
 uint h32_4 = xxHash32.ComputeHash(new MemoryStream(data));
 uint h32_5 = await xxHash32.ComputeHashAsync(new MemoryStream(data));
 uint h32_6 = xxHash32.ComputeHash("veni vidi vici");
+
+ulong h3_1 = xxHash3.ComputeHash(data, data.Length);
+ulong h3_2 = xxHash3.ComputeHash(new Span<byte>(data), data.Length);
+ulong h3_3 = xxHash3.ComputeHash(new ReadOnlySpan<byte>(data), data.Length);
+ulong h3_4 = xxHash3.ComputeHash("veni vidi vici");
 
 uint128 h128_1 = xxHash128.ComputeHash(data, data.Length);
 uint128 h128_2 = xxHash128.ComputeHash(new Span<byte>(data), data.Length);

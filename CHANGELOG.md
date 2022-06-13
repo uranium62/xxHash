@@ -1,3 +1,5 @@
+# 2022-06-13
+- Added xxHash3
 # 2022-06-05
 - Added SIMD support for xxHash128
 - Inlined all method calls for xxHash128
