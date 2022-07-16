@@ -6,11 +6,11 @@ namespace Standart.Hash.xxHash;
 
 public static partial class xxHash32
 {
-    private const uint XXH_PRIME32_1 = 2654435761U;
-    private const uint XXH_PRIME32_2 = 2246822519U;
-    private const uint XXH_PRIME32_3 = 3266489917U;
-    private const uint XXH_PRIME32_4 = 668265263U;
-    private const uint XXH_PRIME32_5 = 374761393U;
+    private static readonly uint XXH_PRIME32_1 = 2654435761U;
+    private static readonly uint XXH_PRIME32_2 = 2246822519U;
+    private static readonly uint XXH_PRIME32_3 = 3266489917U;
+    private static readonly uint XXH_PRIME32_4 = 668265263U;
+    private static readonly uint XXH_PRIME32_5 = 374761393U;
         
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static uint XXH_rotl32(uint x, int r)
