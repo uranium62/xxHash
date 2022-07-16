@@ -27,29 +27,31 @@ public partial class xxHash64
 
             do
             {
+                var reg1 = *((ulong*)(input + 0));
+                var reg2 = *((ulong*)(input + 8));
+                var reg3 = *((ulong*)(input + 16));
+                var reg4 = *((ulong*)(input + 24));
+
                 // XXH64_round
-                v1 += *((ulong*) input) * XXH_PRIME64_2;
+                v1 += reg1 * XXH_PRIME64_2;
                 v1 = (v1 << 31) | (v1 >> (64 - 31));
                 v1 *= XXH_PRIME64_1;
-                input += 8;
 
                 // XXH64_round
-                v2 += *((ulong*) input) * XXH_PRIME64_2;
+                v2 += reg2 * XXH_PRIME64_2;
                 v2 = (v2 << 31) | (v2 >> (64 - 31));
                 v2 *= XXH_PRIME64_1;
-                input += 8;
 
                 // XXH64_round
-                v3 += *((ulong*) input) * XXH_PRIME64_2;
+                v3 += reg3 * XXH_PRIME64_2;
                 v3 = (v3 << 31) | (v3 >> (64 - 31));
                 v3 *= XXH_PRIME64_1;
-                input += 8;
 
                 // XXH64_round
-                v4 += *((ulong*) input) * XXH_PRIME64_2;
+                v4 += reg4 * XXH_PRIME64_2;
                 v4 = (v4 << 31) | (v4 >> (64 - 31));
                 v4 *= XXH_PRIME64_1;
-                input += 8;
+                input += 32;
             } while (input < limit);
 
             h64 = ((v1 << 1) | (v1 >> (64 - 1))) +
@@ -134,29 +136,31 @@ public partial class xxHash64
 
             do
             {
+                var reg1 = *((ulong*)(ptr + 0));
+                var reg2 = *((ulong*)(ptr + 8));
+                var reg3 = *((ulong*)(ptr + 16));
+                var reg4 = *((ulong*)(ptr + 24));
+
                 // XXH64_round
-                v1 += *((ulong*) ptr) * XXH_PRIME64_2;
+                v1 += reg1 * XXH_PRIME64_2;
                 v1 = (v1 << 31) | (v1 >> (64 - 31));
                 v1 *= XXH_PRIME64_1;
-                ptr += 8;
 
                 // XXH64_round
-                v2 += *((ulong*) ptr) * XXH_PRIME64_2;
+                v2 += reg2 * XXH_PRIME64_2;
                 v2 = (v2 << 31) | (v2 >> (64 - 31));
                 v2 *= XXH_PRIME64_1;
-                ptr += 8;
 
                 // XXH64_round
-                v3 += *((ulong*) ptr) * XXH_PRIME64_2;
+                v3 += reg3 * XXH_PRIME64_2;
                 v3 = (v3 << 31) | (v3 >> (64 - 31));
                 v3 *= XXH_PRIME64_1;
-                ptr += 8;
 
                 // XXH64_round
-                v4 += *((ulong*) ptr) * XXH_PRIME64_2;
+                v4 += reg4 * XXH_PRIME64_2;
                 v4 = (v4 << 31) | (v4 >> (64 - 31));
                 v4 *= XXH_PRIME64_1;
-                ptr += 8;
+                ptr += 32;
             } while (ptr < limit);
         }
     }
