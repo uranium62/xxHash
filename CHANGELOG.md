@@ -1,3 +1,6 @@
+# 2022-07-17
+- Improve perfomance for XXH32 & XXH64
+- Improve perfomance for XXH128 & XXH3
 # 2022-06-13
 - Added xxHash3
 # 2022-06-05

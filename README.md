@@ -55,10 +55,10 @@ Runtime=.NET 6.0
 | Hash32             |      x64 |       C  |  140.2 ns |  129.6 us |  150.3 ms | 6.65 GB/s  |
 | Hash64             |      x64 |       C# |  73.9 ns  |   64.6 us |  81.4 ms  | 12.28 GB/s |
 | Hash64             |      x64 |       C  |  75.5 ns  |   65.2 us |  84.5 ms  | 11.83 GB/s |
-| Hash128 (SSE2/AVX2)|      x64 |       C# |  151.6 ns |   64.5 us |  80.5 ms  | 12.04 GB/s |
-| Hash128 (SSE2/AVX2)|      x64 |       C  |  84.4 ns  |   38.3 us |  57.4 ms  | 17.42 GB/s |
-| Hash3   (SSE2/AVX2)|      x64 |       C# |  77.6 ns  |   62.1 us |  78.5 ms  | 12.08 GB/s |
-| Hash3   (SSE2/AVX2)|      x64 |       C  |  73.7 ns  |   42.2 us |  59.8 ms  | 16.72 GB/s |
+| Hash128 (SSE2/AVX2)|      x64 |       C# |  84.95 ns |   56.9 us |  73.2 ms  | 13.66 GB/s |
+| Hash128 (SSE2/AVX2)|      x64 |       C  |  84.35 ns |   38.1 us |  57.2 ms  | 17.48 GB/s |
+| Hash3   (SSE2/AVX2)|      x64 |       C# |  75.8 ns  |   56.6 us |  74.6 ms  | 13.40 GB/s |
+| Hash3   (SSE2/AVX2)|      x64 |       C  |  74.1 ns  |   42.1 us |  59.5 ms  | 16.80 GB/s |
 
 
 ## Api
