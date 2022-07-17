@@ -1,13 +1,14 @@
 namespace Standart.Hash.xxHash.Perf
 {
     using System;
+    using System.IO;
     using BenchmarkDotNet.Attributes;
     
     [RPlotExporter, RankColumn]
     [MinColumn, MaxColumn]
     [MemoryDiagnoser]
     [CoreJob]
-    //[DisassemblyDiagnoser(printAsm: true, printSource: true)]
+    [DisassemblyDiagnoser(maxDepth: 5, exportCombinedDisassemblyReport: true, printInstructionAddresses:true)]
     public class NativeXXHashBenchmark
     {
         const int KB = 1024;
