@@ -8,7 +8,7 @@ namespace Standart.Hash.xxHash
 {
     public static partial class xxHash3
     {
-        private static byte[] XXH3_SECRET =
+        private static readonly byte[] XXH3_SECRET =
         {
             0xb8, 0xfe, 0x6c, 0x39, 0x23, 0xa4, 0x4b, 0xbe, 0x7c, 0x01, 0x81, 0x2c, 0xf7, 0x21, 0xad, 0x1c,
             0xde, 0xd4, 0x6d, 0xe9, 0x83, 0x90, 0x97, 0xdb, 0x72, 0x40, 0xa4, 0xa4, 0xb7, 0xb3, 0x67, 0x1f,
@@ -24,17 +24,17 @@ namespace Standart.Hash.xxHash
             0x45, 0xcb, 0x3a, 0x8f, 0x95, 0x16, 0x04, 0x28, 0xaf, 0xd7, 0xfb, 0xca, 0xbb, 0x4b, 0x40, 0x7e,
         };
 
-        private static ulong[] XXH3_INIT_ACC =
+        private static readonly ulong[] XXH3_INIT_ACC =
         {
             XXH_PRIME32_3, XXH_PRIME64_1, XXH_PRIME64_2, XXH_PRIME64_3,
             XXH_PRIME64_4, XXH_PRIME32_2, XXH_PRIME64_5, XXH_PRIME32_1
         };
 
-        private const int XXH3_MIDSIZE_MAX = 240;
-        private const int XXH3_MIDSIZE_STARTOFFSET = 3;
-        private const int XXH3_MIDSIZE_LASTOFFSET = 17;
-        private const int XXH3_SECRET_SIZE_MIN = 136;
-        private const int XXH3_SECRET_DEFAULT_SIZE = 192;
+        private static readonly int XXH3_MIDSIZE_MAX = 240;
+        private static readonly int XXH3_MIDSIZE_STARTOFFSET = 3;
+        private static readonly int XXH3_MIDSIZE_LASTOFFSET = 17;
+        private static readonly int XXH3_SECRET_SIZE_MIN = 136;
+        private static readonly int XXH3_SECRET_DEFAULT_SIZE = 192;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe ulong XXH3_64bits_internal(byte* input, int len, ulong seed64, byte* secret,
@@ -201,27 +201,11 @@ namespace Standart.Hash.xxHash
             if (seed == 0)
                 return XXH3_hashLong_64b_internal(input, len, secret, secretSize);
 
-            int customSecretSize = XXH3_SECRET_DEFAULT_SIZE;
-            byte* customSecret = stackalloc byte[customSecretSize];
-
-            fixed (byte* ptr = &XXH3_SECRET[0])
-            {
-                for (int i = 0; i < customSecretSize; i += 8)
-                {
-                    customSecret[i] = ptr[i];
-                    customSecret[i + 1] = ptr[i + 1];
-                    customSecret[i + 2] = ptr[i + 2];
-                    customSecret[i + 3] = ptr[i + 3];
-                    customSecret[i + 4] = ptr[i + 4];
-                    customSecret[i + 5] = ptr[i + 5];
-                    customSecret[i + 6] = ptr[i + 6];
-                    customSecret[i + 7] = ptr[i + 7];
-                }
-            }
+            byte* customSecret = stackalloc byte[XXH3_SECRET_DEFAULT_SIZE];
 
             XXH3_initCustomSecret(customSecret, seed);
 
-            return XXH3_hashLong_64b_internal(input, len, customSecret, customSecretSize);
+            return XXH3_hashLong_64b_internal(input, len, customSecret, XXH3_SECRET_DEFAULT_SIZE);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -238,40 +222,78 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret_avx2(byte* customSecret, ulong seed64)
         {
-            const int m256i_size = 32;
-
-            var seed = Vector256.Create(seed64, 0U - seed64, seed64, 0U - seed64);
+            var seed = Vector256.Create(seed64, (0U - seed64), seed64, (0U - seed64));
 
             fixed (byte* secret = &XXH3_SECRET[0])
             {
-                for (int i = 0; i < XXH_SECRET_DEFAULT_SIZE / m256i_size; i++)
-                {
-                    int uint64_offset = i * 4;
+                var src0 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 0);
+                var src1 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 4);
+                var src2 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 8);
+                var src3 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 12);
+                var src4 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 16);
+                var src5 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 20);
 
-                    var src32 = Avx2.LoadVector256(((ulong*) secret) + uint64_offset);
-                    var dst32 = Avx2.Add(src32, seed);
-                                Avx2.Store((ulong*) customSecret + uint64_offset, dst32);
-                }
+                var dst0 = Avx2.Add(src0, seed);
+                var dst1 = Avx2.Add(src1, seed);
+                var dst2 = Avx2.Add(src2, seed);
+                var dst3 = Avx2.Add(src3, seed);
+                var dst4 = Avx2.Add(src4, seed);
+                var dst5 = Avx2.Add(src5, seed);
+
+                Unsafe.Write((ulong*)customSecret + 0, dst0);
+                Unsafe.Write((ulong*)customSecret + 4, dst1);
+                Unsafe.Write((ulong*)customSecret + 8, dst2);
+                Unsafe.Write((ulong*)customSecret + 12, dst3);
+                Unsafe.Write((ulong*)customSecret + 16, dst4);
+                Unsafe.Write((ulong*)customSecret + 20, dst5);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret_sse2(byte* customSecret, ulong seed64)
         {
-            const int m128i_size = 16;
-
-            var seed = Vector128.Create((long) seed64, (long) (0U - seed64));
+            var seed = Vector128.Create((long)seed64, (long)(0U - seed64));
 
             fixed (byte* secret = &XXH3_SECRET[0])
             {
-                for (int i = 0; i < XXH_SECRET_DEFAULT_SIZE / m128i_size; i++)
-                {
-                    int uint64_offset = i * 2;
+                var src0 = Unsafe.Read<Vector128<long>>((long*)secret + 0);
+                var src1 = Unsafe.Read<Vector128<long>>((long*)secret + 2);
+                var src2 = Unsafe.Read<Vector128<long>>((long*)secret + 4);
+                var src3 = Unsafe.Read<Vector128<long>>((long*)secret + 6);
+                var src4 = Unsafe.Read<Vector128<long>>((long*)secret + 8);
+                var src5 = Unsafe.Read<Vector128<long>>((long*)secret + 10);
+                var src6 = Unsafe.Read<Vector128<long>>((long*)secret + 12);
+                var src7 = Unsafe.Read<Vector128<long>>((long*)secret + 14);
+                var src8 = Unsafe.Read<Vector128<long>>((long*)secret + 16);
+                var src9 = Unsafe.Read<Vector128<long>>((long*)secret + 18);
+                var src10 = Unsafe.Read<Vector128<long>>((long*)secret + 20);
+                var src11 = Unsafe.Read<Vector128<long>>((long*)secret + 22);
 
-                    var src16 = Sse2.LoadVector128(((long*) secret) + uint64_offset);
-                    var dst16 = Sse2.Add(src16, seed);
-                                Sse2.Store((long*) customSecret + uint64_offset, dst16);
-                }
+                var dst0 = Sse2.Add(src0, seed);
+                var dst1 = Sse2.Add(src1, seed);
+                var dst2 = Sse2.Add(src2, seed);
+                var dst3 = Sse2.Add(src3, seed);
+                var dst4 = Sse2.Add(src4, seed);
+                var dst5 = Sse2.Add(src5, seed);
+                var dst6 = Sse2.Add(src6, seed);
+                var dst7 = Sse2.Add(src7, seed);
+                var dst8 = Sse2.Add(src8, seed);
+                var dst9 = Sse2.Add(src9, seed);
+                var dst10 = Sse2.Add(src10, seed);
+                var dst11 = Sse2.Add(src11, seed);
+
+                Unsafe.Write((long*)customSecret + 0, dst0);
+                Unsafe.Write((long*)customSecret + 2, dst1);
+                Unsafe.Write((long*)customSecret + 4, dst2);
+                Unsafe.Write((long*)customSecret + 6, dst3);
+                Unsafe.Write((long*)customSecret + 8, dst4);
+                Unsafe.Write((long*)customSecret + 10, dst5);
+                Unsafe.Write((long*)customSecret + 12, dst6);
+                Unsafe.Write((long*)customSecret + 14, dst7);
+                Unsafe.Write((long*)customSecret + 16, dst8);
+                Unsafe.Write((long*)customSecret + 18, dst9);
+                Unsafe.Write((long*)customSecret + 20, dst10);
+                Unsafe.Write((long*)customSecret + 22, dst11);
             }
         }
 
@@ -295,23 +317,24 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe ulong XXH3_hashLong_64b_internal(byte* input, int len, byte* secret, int secretSize)
         {
-            ulong* acc = stackalloc ulong[8];
-
-            fixed (ulong* ptr = &XXH3_INIT_ACC[0])
+            fixed (ulong* src = &XXH3_INIT_ACC[0])
             {
-                acc[0] = ptr[0];
-                acc[1] = ptr[1];
-                acc[2] = ptr[2];
-                acc[3] = ptr[3];
-                acc[4] = ptr[4];
-                acc[5] = ptr[5];
-                acc[6] = ptr[6];
-                acc[7] = ptr[7];
+                ulong* acc = stackalloc ulong[8]
+                {
+                    *(src + 0),
+                    *(src + 1),
+                    *(src + 2),
+                    *(src + 3),
+                    *(src + 4),
+                    *(src + 5),
+                    *(src + 6),
+                    *(src + 7),
+                };
+
+                XXH3_hashLong_internal_loop(acc, input, len, secret, secretSize);
+
+                return XXH3_mergeAccs(acc, secret + XXH_SECRET_MERGEACCS_START, ((ulong)len) * XXH_PRIME64_1);
             }
-
-            XXH3_hashLong_internal_loop(acc, input, len, secret, secretSize);
-
-            return XXH3_mergeAccs(acc, secret + XXH_SECRET_MERGEACCS_START, ((ulong) len) * XXH_PRIME64_1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -378,51 +401,89 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_accumulate_512_avx2(ulong* acc, byte* input, byte* secret)
         {
-            const int m256i_size = 32;
-            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
-            const byte _MM_SHUFFLE_1_0_3_2 = 0b0100_1110;
+            var acc_vec0 = Unsafe.Read<Vector256<ulong>>(acc + 0);
+            var acc_vec1 = Unsafe.Read<Vector256<ulong>>(acc + 4);
 
-            for (int i = 0; i < XXH_STRIPE_LEN / m256i_size; i++)
-            {
-                int uint32_offset = i * 8;
-                int uint64_offset = i * 4;
+            var data_vec0 = Unsafe.Read<Vector256<ulong>>((ulong*)input + 0).AsUInt32();
+            var data_vec1 = Unsafe.Read<Vector256<ulong>>((ulong*)input + 4).AsUInt32();
 
-                var acc_vec = Avx2.LoadVector256(acc + uint64_offset);
-                var data_vec = Avx2.LoadVector256((uint*) input + uint32_offset);
-                var key_vec = Avx2.LoadVector256((uint*) secret + uint32_offset);
-                var data_key = Avx2.Xor(data_vec, key_vec);
-                var data_key_lo = Avx2.Shuffle(data_key, _MM_SHUFFLE_0_3_0_1);
-                var product = Avx2.Multiply(data_key, data_key_lo);
-                var data_swap = Avx2.Shuffle(data_vec, _MM_SHUFFLE_1_0_3_2).AsUInt64();
-                var sum = Avx2.Add(acc_vec, data_swap);
-                var result = Avx2.Add(product, sum);
-                Avx2.Store(acc + uint64_offset, result);
-            }
+            var key_vec0 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 0).AsUInt32();
+            var key_vec1 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 4).AsUInt32();
+
+            var data_key0 = Avx2.Xor(data_vec0, key_vec0);
+            var data_key1 = Avx2.Xor(data_vec1, key_vec1);
+
+            var data_key_lo0 = Avx2.Shuffle(data_key0, MM_SHUFFLE_0_3_0_1);
+            var data_key_lo1 = Avx2.Shuffle(data_key1, MM_SHUFFLE_0_3_0_1);
+
+            var product0 = Avx2.Multiply(data_key0, data_key_lo0);
+            var product1 = Avx2.Multiply(data_key1, data_key_lo1);
+
+            var data_swap0 = Avx2.Shuffle(data_vec0, MM_SHUFFLE_1_0_3_2).AsUInt64();
+            var data_swap1 = Avx2.Shuffle(data_vec1, MM_SHUFFLE_1_0_3_2).AsUInt64();
+
+            var sum0 = Avx2.Add(acc_vec0, data_swap0);
+            var sum1 = Avx2.Add(acc_vec1, data_swap1);
+
+            var result0 = Avx2.Add(product0, sum0);
+            var result1 = Avx2.Add(product1, sum1);
+
+            Unsafe.Write(acc + 0, result0);
+            Unsafe.Write(acc + 4, result1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_accumulate_512_sse2(ulong* acc, byte* input, byte* secret)
         {
-            const int m128i_size = 16;
-            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
-            const byte _MM_SHUFFLE_1_0_3_2 = 0b0100_1110;
+            var acc_vec0 = Unsafe.Read<Vector128<ulong>>(acc + 0);
+            var acc_vec1 = Unsafe.Read<Vector128<ulong>>(acc + 2);
+            var acc_vec2 = Unsafe.Read<Vector128<ulong>>(acc + 4);
+            var acc_vec3 = Unsafe.Read<Vector128<ulong>>(acc + 6);
 
-            for (int i = 0; i < XXH_STRIPE_LEN / m128i_size; i++)
-            {
-                int uint32_offset = i * 4;
-                int uint64_offset = i * 2;
+            var data_vec0 = Unsafe.Read<Vector128<ulong>>((ulong*)input + 0).AsUInt32();
+            var data_vec1 = Unsafe.Read<Vector128<ulong>>((ulong*)input + 2).AsUInt32();
+            var data_vec2 = Unsafe.Read<Vector128<ulong>>((ulong*)input + 4).AsUInt32();
+            var data_vec3 = Unsafe.Read<Vector128<ulong>>((ulong*)input + 6).AsUInt32();
 
-                var acc_vec = Sse2.LoadVector128(acc + uint64_offset);
-                var data_vec = Sse2.LoadVector128((uint*) input + uint32_offset);
-                var key_vec = Sse2.LoadVector128((uint*) secret + uint32_offset);
-                var data_key = Sse2.Xor(data_vec, key_vec);
-                var data_key_lo = Sse2.Shuffle(data_key, _MM_SHUFFLE_0_3_0_1);
-                var product = Sse2.Multiply(data_key, data_key_lo);
-                var data_swap = Sse2.Shuffle(data_vec, _MM_SHUFFLE_1_0_3_2).AsUInt64();
-                var sum = Sse2.Add(acc_vec, data_swap);
-                var result = Sse2.Add(product, sum);
-                Sse2.Store(acc + uint64_offset, result);
-            }
+            var key_vec0 = Unsafe.Read<Vector128<ulong>>((ulong*)secret + 0).AsUInt32();
+            var key_vec1 = Unsafe.Read<Vector128<ulong>>((ulong*)secret + 2).AsUInt32();
+            var key_vec2 = Unsafe.Read<Vector128<ulong>>((ulong*)secret + 4).AsUInt32();
+            var key_vec3 = Unsafe.Read<Vector128<ulong>>((ulong*)secret + 6).AsUInt32();
+
+            var data_key0 = Sse2.Xor(data_vec0, key_vec0);
+            var data_key1 = Sse2.Xor(data_vec1, key_vec1);
+            var data_key2 = Sse2.Xor(data_vec2, key_vec2);
+            var data_key3 = Sse2.Xor(data_vec3, key_vec3);
+
+            var data_key_lo0 = Sse2.Shuffle(data_key0, MM_SHUFFLE_0_3_0_1);
+            var data_key_lo1 = Sse2.Shuffle(data_key1, MM_SHUFFLE_0_3_0_1);
+            var data_key_lo2 = Sse2.Shuffle(data_key2, MM_SHUFFLE_0_3_0_1);
+            var data_key_lo3 = Sse2.Shuffle(data_key3, MM_SHUFFLE_0_3_0_1);
+
+            var product0 = Sse2.Multiply(data_key0, data_key_lo0);
+            var product1 = Sse2.Multiply(data_key1, data_key_lo1);
+            var product2 = Sse2.Multiply(data_key2, data_key_lo2);
+            var product3 = Sse2.Multiply(data_key3, data_key_lo3);
+
+            var data_swap0 = Sse2.Shuffle(data_vec0, MM_SHUFFLE_1_0_3_2).AsUInt64();
+            var data_swap1 = Sse2.Shuffle(data_vec1, MM_SHUFFLE_1_0_3_2).AsUInt64();
+            var data_swap2 = Sse2.Shuffle(data_vec2, MM_SHUFFLE_1_0_3_2).AsUInt64();
+            var data_swap3 = Sse2.Shuffle(data_vec3, MM_SHUFFLE_1_0_3_2).AsUInt64();
+
+            var sum0 = Sse2.Add(acc_vec0, data_swap0);
+            var sum1 = Sse2.Add(acc_vec1, data_swap1);
+            var sum2 = Sse2.Add(acc_vec2, data_swap2);
+            var sum3 = Sse2.Add(acc_vec3, data_swap3);
+
+            var result0 = Sse2.Add(product0, sum0);
+            var result1 = Sse2.Add(product1, sum1);
+            var result2 = Sse2.Add(product2, sum2);
+            var result3 = Sse2.Add(product3, sum3);
+
+            Unsafe.Write(acc + 0, result0);
+            Unsafe.Write(acc + 2, result1);
+            Unsafe.Write(acc + 4, result2);
+            Unsafe.Write(acc + 6, result3);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -459,52 +520,89 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc_avx2(ulong* acc, byte* secret)
         {
-            const int m256i_size = 32;
-            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
+            var acc_vec0 = Unsafe.Read<Vector256<ulong>>(acc + 0);
+            var acc_vec1 = Unsafe.Read<Vector256<ulong>>(acc + 4);
 
-            var prime32 = Vector256.Create(XXH_PRIME32_1);
+            var shifted0 = Avx2.ShiftRightLogical(acc_vec0, 47);
+            var shifted1 = Avx2.ShiftRightLogical(acc_vec1, 47);
 
-            for (int i = 0; i < XXH_STRIPE_LEN / m256i_size; i++)
-            {
-                int uint64_offset = i * 4;
+            var data_vec0 = Avx2.Xor(acc_vec0, shifted0);
+            var data_vec1 = Avx2.Xor(acc_vec1, shifted1);
 
-                var acc_vec = Avx2.LoadVector256(acc + uint64_offset);
-                var shifted = Avx2.ShiftRightLogical(acc_vec, 47);
-                var data_vec = Avx2.Xor(acc_vec, shifted);
-                var key_vec = Avx2.LoadVector256((ulong*) secret + uint64_offset);
-                var data_key = Avx2.Xor(data_vec, key_vec).AsUInt32();
-                var data_key_hi = Avx2.Shuffle(data_key, _MM_SHUFFLE_0_3_0_1);
-                var prod_lo = Avx2.Multiply(data_key, prime32);
-                var prod_hi = Avx2.Multiply(data_key_hi, prime32);
-                var result = Avx2.Add(prod_lo, Avx2.ShiftLeftLogical(prod_hi, 32));
-                Avx2.Store(acc + uint64_offset, result);
-            }
+            var key_vec0 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 0);
+            var key_vec1 = Unsafe.Read<Vector256<ulong>>((ulong*)secret + 4);
+
+            var data_key0 = Avx2.Xor(data_vec0, key_vec0).AsUInt32();
+            var data_key1 = Avx2.Xor(data_vec1, key_vec1).AsUInt32();
+
+            var data_key_hi0 = Avx2.Shuffle(data_key0, MM_SHUFFLE_0_3_0_1);
+            var data_key_hi1 = Avx2.Shuffle(data_key1, MM_SHUFFLE_0_3_0_1);
+
+            var prod_lo0 = Avx2.Multiply(data_key0, M256i_XXH_PRIME32_1);
+            var prod_lo1 = Avx2.Multiply(data_key1, M256i_XXH_PRIME32_1);
+
+            var prod_hi0 = Avx2.Multiply(data_key_hi0, M256i_XXH_PRIME32_1);
+            var prod_hi1 = Avx2.Multiply(data_key_hi1, M256i_XXH_PRIME32_1);
+
+            var result0 = Avx2.Add(prod_lo0, Avx2.ShiftLeftLogical(prod_hi0, 32));
+            var result1 = Avx2.Add(prod_lo1, Avx2.ShiftLeftLogical(prod_hi1, 32));
+
+            Unsafe.Write(acc + 0, result0);
+            Unsafe.Write(acc + 4, result1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc_sse2(ulong* acc, byte* secret)
         {
-            const int m128i_size = 16;
-            const byte _MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
+            var acc_vec0 = Unsafe.Read<Vector128<ulong>>(acc + 0).AsUInt32();
+            var acc_vec1 = Unsafe.Read<Vector128<ulong>>(acc + 2).AsUInt32();
+            var acc_vec2 = Unsafe.Read<Vector128<ulong>>(acc + 4).AsUInt32();
+            var acc_vec3 = Unsafe.Read<Vector128<ulong>>(acc + 6).AsUInt32();
 
-            var prime32 = Vector128.Create(XXH_PRIME32_1);
+            var shifted0 = Sse2.ShiftRightLogical(acc_vec0, 47);
+            var shifted1 = Sse2.ShiftRightLogical(acc_vec1, 47);
+            var shifted2 = Sse2.ShiftRightLogical(acc_vec2, 47);
+            var shifted3 = Sse2.ShiftRightLogical(acc_vec3, 47);
 
-            for (int i = 0; i < XXH_STRIPE_LEN / m128i_size; i++)
-            {
-                int uint32_offset = i * 4;
-                int uint64_offset = i * 2;
+            var data_vec0 = Sse2.Xor(acc_vec0, shifted0);
+            var data_vec1 = Sse2.Xor(acc_vec1, shifted1);
+            var data_vec2 = Sse2.Xor(acc_vec2, shifted2);
+            var data_vec3 = Sse2.Xor(acc_vec3, shifted3);
 
-                var acc_vec = Sse2.LoadVector128(acc + uint64_offset).AsUInt32();
-                var shifted = Sse2.ShiftRightLogical(acc_vec, 47);
-                var data_vec = Sse2.Xor(acc_vec, shifted);
-                var key_vec = Sse2.LoadVector128((uint*) secret + uint32_offset);
-                var data_key = Sse2.Xor(data_vec, key_vec);
-                var data_key_hi = Sse2.Shuffle(data_key.AsUInt32(), _MM_SHUFFLE_0_3_0_1);
-                var prod_lo = Sse2.Multiply(data_key, prime32);
-                var prod_hi = Sse2.Multiply(data_key_hi, prime32);
-                var result = Sse2.Add(prod_lo, Sse2.ShiftLeftLogical(prod_hi, 32));
-                Sse2.Store(acc + uint64_offset, result);
-            }
+            var key_vec0 = Unsafe.Read<Vector128<ulong>>((ulong*)secret + 0).AsUInt32();
+            var key_vec1 = Unsafe.Read<Vector128<ulong>>((ulong*)secret + 2).AsUInt32();
+            var key_vec2 = Unsafe.Read<Vector128<ulong>>((ulong*)secret + 4).AsUInt32();
+            var key_vec3 = Unsafe.Read<Vector128<ulong>>((ulong*)secret + 6).AsUInt32();
+
+            var data_key0 = Sse2.Xor(data_vec0, key_vec0);
+            var data_key1 = Sse2.Xor(data_vec1, key_vec1);
+            var data_key2 = Sse2.Xor(data_vec2, key_vec2);
+            var data_key3 = Sse2.Xor(data_vec3, key_vec3);
+
+            var data_key_hi0 = Sse2.Shuffle(data_key0.AsUInt32(), MM_SHUFFLE_0_3_0_1);
+            var data_key_hi1 = Sse2.Shuffle(data_key1.AsUInt32(), MM_SHUFFLE_0_3_0_1);
+            var data_key_hi2 = Sse2.Shuffle(data_key2.AsUInt32(), MM_SHUFFLE_0_3_0_1);
+            var data_key_hi3 = Sse2.Shuffle(data_key3.AsUInt32(), MM_SHUFFLE_0_3_0_1);
+
+            var prod_lo0 = Sse2.Multiply(data_key0, M128i_XXH_PRIME32_1);
+            var prod_lo1 = Sse2.Multiply(data_key1, M128i_XXH_PRIME32_1);
+            var prod_lo2 = Sse2.Multiply(data_key2, M128i_XXH_PRIME32_1);
+            var prod_lo3 = Sse2.Multiply(data_key3, M128i_XXH_PRIME32_1);
+
+            var prod_hi0 = Sse2.Multiply(data_key_hi0, M128i_XXH_PRIME32_1);
+            var prod_hi1 = Sse2.Multiply(data_key_hi1, M128i_XXH_PRIME32_1);
+            var prod_hi2 = Sse2.Multiply(data_key_hi2, M128i_XXH_PRIME32_1);
+            var prod_hi3 = Sse2.Multiply(data_key_hi3, M128i_XXH_PRIME32_1);
+
+            var result0 = Sse2.Add(prod_lo0, Sse2.ShiftLeftLogical(prod_hi0, 32));
+            var result1 = Sse2.Add(prod_lo1, Sse2.ShiftLeftLogical(prod_hi1, 32));
+            var result2 = Sse2.Add(prod_lo2, Sse2.ShiftLeftLogical(prod_hi2, 32));
+            var result3 = Sse2.Add(prod_lo3, Sse2.ShiftLeftLogical(prod_hi3, 32));
+
+            Unsafe.Write(acc + 0, result0);
+            Unsafe.Write(acc + 2, result1);
+            Unsafe.Write(acc + 4, result2);
+            Unsafe.Write(acc + 6, result3);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
