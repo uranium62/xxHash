@@ -36,12 +36,12 @@ Runtime=.NET 6.0
 
 | Method         |       x64  |
 |:---------------|-----------:|
-| Hash32 Array   | 5.87 GB/s  |
-| Hash64 Array   | 9.07 GB/s  |
+| Hash32 Array   | 6.65 GB/s  |
+| Hash64 Array   | 12.28 GB/s |
 | Hash128 Array  | 12.04 GB/s |
 | Hash3 Array    | 12.08 GB/s |
-| Hash32 Span    | 5.87 GB/s  |
-| Hash64 Span    | 9.07 GB/s  |
+| Hash32 Span    | 6.65 GB/s  |
+| Hash64 Span    | 12.28 GB/s |
 | Hash128 Span   | 12.04 GB/s |
 | Hash3 Span     | 12.08 GB/s |
 | Hash32 Stream  | 3.22 GB/s  |
@@ -51,14 +51,14 @@ Runtime=.NET 6.0
 
 | Method             | Platform | Language |  1KB Time |  1MB Time |  1GB Time |     Speed  |
 |:-------------------|---------:|---------:|----------:|----------:|----------:|-----------:|
-| Hash32             |      x64 |       C# |  151.5 ns |  143.4 us |  170.3 ms | 5.87 GB/s  |
-| Hash32             |      x64 |       C  |  138.5 ns |  129.5 us |  152.4 ms | 6.56 GB/s  |
-| Hash64             |      x64 |       C# |  84.6 ns  |   77.9 us |  110.2 ms | 9.07 GB/s  |
-| Hash64             |      x64 |       C  |  74.2 ns  |   64.8 us |  83.0 ms  | 12.04 GB/s |
-| Hash128 (SSE2/AVX2)|      x64 |       C# |  151.6 ns |   64.5 us |  80.5 ms  | 12.04 GB/s |
-| Hash128 (SSE2/AVX2)|      x64 |       C  |  84.4 ns  |   38.3 us |  57.4 ms  | 17.42 GB/s |
-| Hash3   (SSE2/AVX2)|      x64 |       C# |  77.6 ns  |   62.1 us |  78.5 ms  | 12.08 GB/s |
-| Hash3   (SSE2/AVX2)|      x64 |       C  |  73.7 ns  |   42.2 us |  59.8 ms  | 16.72 GB/s |
+| Hash32             |      x64 |       C# |  138.0 ns |  130.2 us |  150.3 ms | 6.65 GB/s  |
+| Hash32             |      x64 |       C  |  140.2 ns |  129.6 us |  150.3 ms | 6.65 GB/s  |
+| Hash64             |      x64 |       C# |  73.9 ns  |   64.6 us |  81.4 ms  | 12.28 GB/s |
+| Hash64             |      x64 |       C  |  75.5 ns  |   65.2 us |  84.5 ms  | 11.83 GB/s |
+| Hash128 (SSE2/AVX2)|      x64 |       C# |  84.95 ns |   56.9 us |  73.2 ms  | 13.66 GB/s |
+| Hash128 (SSE2/AVX2)|      x64 |       C  |  84.35 ns |   38.1 us |  57.2 ms  | 17.48 GB/s |
+| Hash3   (SSE2/AVX2)|      x64 |       C# |  75.8 ns  |   56.6 us |  74.6 ms  | 13.40 GB/s |
+| Hash3   (SSE2/AVX2)|      x64 |       C  |  74.1 ns  |   42.1 us |  59.5 ms  | 16.80 GB/s |
 
 
 ## Api

@@ -3,12 +3,13 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <PackageId>Standart.Hash.xxHash.Signed</PackageId>
-    <VersionPrefix>4.0.3</VersionPrefix>
+    <VersionPrefix>4.0.4</VersionPrefix>
     <AssemblyName>Standart.Hash.xxHash.Signed</AssemblyName>
     <AssemblyTitle>Standart.Hash.xxHash.Signed</AssemblyTitle>
     <Authors>Oleksandr Melnyk</Authors>
     <PackageTags>hash;xxHash</PackageTags>
     <Description>Standart.Hash.xxHash</Description>
     <PackageProjectUrl>https://github.com/uranium62/xxHash</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>

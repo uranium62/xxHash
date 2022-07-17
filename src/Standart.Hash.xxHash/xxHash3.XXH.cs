@@ -1,30 +1,39 @@
 // ReSharper disable InconsistentNaming
 
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
 namespace Standart.Hash.xxHash
 {
     public static partial class xxHash3
     {
-        private const ulong XXH_PRIME64_1 = 11400714785074694791UL;
-        private const ulong XXH_PRIME64_2 = 14029467366897019727UL;
-        private const ulong XXH_PRIME64_3 = 1609587929392839161UL;
-        private const ulong XXH_PRIME64_4 = 9650029242287828579UL;
-        private const ulong XXH_PRIME64_5 = 2870177450012600261UL;
+        private static readonly ulong XXH_PRIME64_1 = 11400714785074694791UL;
+        private static readonly ulong XXH_PRIME64_2 = 14029467366897019727UL;
+        private static readonly ulong XXH_PRIME64_3 = 1609587929392839161UL;
+        private static readonly ulong XXH_PRIME64_4 = 9650029242287828579UL;
+        private static readonly ulong XXH_PRIME64_5 = 2870177450012600261UL;
 
-        private const uint XXH_PRIME32_1 = 2654435761U;
-        private const uint XXH_PRIME32_2 = 2246822519U;
-        private const uint XXH_PRIME32_3 = 3266489917U;
-        private const uint XXH_PRIME32_4 = 668265263U;
-        private const uint XXH_PRIME32_5 = 374761393U;
+        private static readonly uint XXH_PRIME32_1 = 2654435761U;
+        private static readonly uint XXH_PRIME32_2 = 2246822519U;
+        private static readonly uint XXH_PRIME32_3 = 3266489917U;
+        private static readonly uint XXH_PRIME32_4 = 668265263U;
+        private static readonly uint XXH_PRIME32_5 = 374761393U;
 
-        private const int XXH_STRIPE_LEN = 64;
-        private const int XXH_ACC_NB = XXH_STRIPE_LEN / 8;
-        private const int XXH_SECRET_CONSUME_RATE = 8;
-        private const int XXH_SECRET_DEFAULT_SIZE = 192;
-        private const int XXH_SECRET_MERGEACCS_START = 11;
-        private const int XXH_SECRET_LASTACC_START = 7;
+        private static readonly int XXH_STRIPE_LEN = 64;
+        private static readonly int XXH_ACC_NB = XXH_STRIPE_LEN / 8;
+        private static readonly int XXH_SECRET_CONSUME_RATE = 8;
+        private static readonly int XXH_SECRET_DEFAULT_SIZE = 192;
+        private static readonly int XXH_SECRET_MERGEACCS_START = 11;
+        private static readonly int XXH_SECRET_LASTACC_START = 7;
+
+        private static readonly byte MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
+        private static readonly byte MM_SHUFFLE_1_0_3_2 = 0b0100_1110;
+
+        [FixedAddressValueType]
+        private static readonly Vector256<uint> M256i_XXH_PRIME32_1 = Vector256.Create(XXH_PRIME32_1);
+        [FixedAddressValueType]
+        private static readonly Vector128<uint> M128i_XXH_PRIME32_1 = Vector128.Create(XXH_PRIME32_1);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe ulong XXH_readLE64(byte* ptr)
