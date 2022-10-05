@@ -3,7 +3,6 @@
   <Import Project="..\..\nuget.props" />
   
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
