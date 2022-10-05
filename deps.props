@@ -1,5 +1,7 @@
 <Project>
   <PropertyGroup>
+	<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+	<LangVersion>9.0</LangVersion>
 	<BenchmarkDotNet>0.13.1</BenchmarkDotNet>
 	<MicrosoftSdk>17.2.0</MicrosoftSdk>
 	<xUnit>2.4.1</xUnit>
