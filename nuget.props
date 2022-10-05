@@ -1,9 +1,8 @@
 <Project> 
   <Import Project="deps.props" />
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <PackageId>Standart.Hash.xxHash.Signed</PackageId>
-    <VersionPrefix>4.0.4</VersionPrefix>
+    <PackageId>Standart.Hash.xxHash</PackageId>
+    <VersionPrefix>4.0.5</VersionPrefix>
     <AssemblyName>Standart.Hash.xxHash.Signed</AssemblyName>
     <AssemblyTitle>Standart.Hash.xxHash.Signed</AssemblyTitle>
     <Authors>Oleksandr Melnyk</Authors>
