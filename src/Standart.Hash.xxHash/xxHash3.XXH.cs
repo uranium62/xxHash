@@ -96,7 +96,7 @@ namespace Standart.Hash.xxHash
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint128 XXH_mult64to128(ulong lhs, ulong rhs)
         {
-            if (Bmi2.IsSupported)
+            if (Bmi2.X64.IsSupported)
                 return XXH_mult64to128_bmi2(lhs, rhs);
 
             return XXH_mult64to128_scalar(lhs, rhs);
