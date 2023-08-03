@@ -30,9 +30,7 @@ namespace Standart.Hash.xxHash
         private static readonly byte MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
         private static readonly byte MM_SHUFFLE_1_0_3_2 = 0b0100_1110;
 
-        [FixedAddressValueType]
         private static readonly Vector256<uint> M256i_XXH_PRIME32_1 = Vector256.Create(XXH_PRIME32_1);
-        [FixedAddressValueType]
         private static readonly Vector128<uint> M128i_XXH_PRIME32_1 = Vector128.Create(XXH_PRIME32_1);
 
 
